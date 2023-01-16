@@ -1,24 +1,15 @@
 
-def quaternion_multiply ( a, b ) :
-    """
-      Multiplies two quaternions.
-    """
-    w1, x1, y1, z1 = a
-    w2, x2, y2, z2 = b
-    w = w1*w2 - x1*x2 - y1*y2 - z1*z2
-    x = w1*x2 + x1*w2 + y1*z2 - z1*y2
-    y = w1*y2 + y1*w2 + z1*x2 - x1*z2
-    z = w1*z2 + z1*w2 + x1*y2 - y1*x2
-    return (w, x, y, z)
+def orientation_multiply ( lhs, rhs ) :
+    return [ lhs[i] for i in rhs ]
+
 
 class Cube :
     """
       A Cube is a 3x3x3 Rubik's Cube.
       The internal state is expressed as a sparse 20 by 20 matrix of quaternions.
       This representation is simplified into an array of 20 tuples, each of which is
-      the index of the piece and the quaternion representing its orientation.
+      the index of the piece and a permutation of the original orientation.
       This means that the index in the array is the original position of the piece.
-      The quaternions are represented as simple tuples of 4 floats; w, x, y, z.
 
       The numbering of the pieces follows the reverse order in which you would
       solve the cube, with the bottom layer being white and the front layer being
@@ -46,6 +37,7 @@ class Cube :
       14 ---- 19 ---- 15
     """
 
+    face_colors = "YOBRGW"
     pieces = [
         { "name" : "Yellow-Green-Orange", "colors" : "YO--G-" },
         { "name" : "Yellow-Green-Red",    "colors" : "Y--RG-" },
@@ -75,8 +67,96 @@ class Cube :
     def __str__ ( self ) :
         r = ""
         for i in range(20) :
-            piece, quaternion = self.cube[i]
-            r += f"{'.'*piece}X{'.'*(19-piece)} | {Cube.pieces[i]['colors']} | {quaternion}\n"
+            piece, orientation = self.cube[i]
+            r += f"{'.'*piece}X{'.'*(19-piece)} | {Cube.pieces[piece]['colors']} | {orientation}\n"
+        r += "\n"
+        net = [['.' for _ in range(12)] for _ in range(9)]
+        net[1][4] = 'W'
+        net[4][1] = 'O'
+        net[4][4] = 'G'
+        net[4][7] = 'R'
+        net[4][10] = 'B'
+        net[7][4] = 'Y'
+        for y, x, piece, dir in [
+          # White
+          (0, 3, 14, 5),
+          (0, 4, 19, 5),
+          (0, 5, 15, 5),
+          (1, 3, 17, 5),
+          (1, 5, 18, 5),
+          (2, 3, 12, 5),
+          (2, 4, 16, 5),
+          (2, 5, 13, 5),
+
+          # Orange
+          (3, 0, 14, 1),
+          (3, 1, 17, 1),
+          (3, 2, 12, 1),
+          (4, 0, 10, 1),
+          (4, 2,  8, 1),
+          (5, 0,  2, 1),
+          (5, 1,  5, 1),
+          (5, 2,  0, 1),
+
+          # Green
+          (3, 3, 12, 4),
+          (3, 4, 16, 4),
+          (3, 5, 13, 4),
+          (4, 3,  8, 4),
+          (4, 5,  9, 4),
+          (5, 3,  0, 4),
+          (5, 4,  4, 4),
+          (5, 5,  1, 4),
+
+          # Red
+          (3, 6, 13, 3),
+          (3, 7, 18, 3),
+          (3, 8, 15, 3),
+          (4, 6,  9, 3),
+          (4, 8, 11, 3),
+          (5, 6,  1, 3),
+          (5, 7,  6, 3),
+          (5, 8,  3, 3),
+
+          # Blue
+          (3, 9, 15, 2),
+          (3, 10, 19, 2),
+          (3, 11, 14, 2),
+          (4, 9, 11, 2),
+          (4, 11, 10, 2),
+          (5, 9,  3, 2),
+          (5, 10, 7, 2),
+          (5, 11, 2, 2),
+
+          # Yellow
+          (6, 3,  0, 0),
+          (6, 4,  4, 0),
+          (6, 5,  1, 0),
+          (7, 3,  5, 0),
+          (7, 5,  6, 0),
+          (8, 3,  2, 0),
+          (8, 4,  7, 0),
+          (8, 5,  3, 0)
+        ]:
+            net[y][x] = Cube.face_colors[self.cube[piece][1][dir]]
+
+        # add command colors
+        command_colors = {
+            'W' : '7',
+            'O' : '5',
+            'G' : '2',
+            'R' : '1',
+            'B' : '4',
+            'Y' : '3'
+        }
+        for line in net :
+            for i in range(len(line)) :
+                if line[i] in command_colors :
+                    line[i] = f"\033[1;3{command_colors[line[i]][0]}m{line[i]}\033[0m"
+
+        for line in net :
+            r += "".join(line) + "\n"
+        
         return r
     
     def __getitem__ ( self, loc ) :
@@ -85,49 +165,44 @@ class Cube :
     def __mul__ ( self, rhs ) :
         new_cube = [None] * 20
         for loc in range(20) :
-            prev_loc, quaternion = rhs[loc]
-            piece, prev_quaternion = self.cube[prev_loc]
-            new_quaternion = quaternion_multiply(prev_quaternion, quaternion)
-            new_cube[loc] = (piece, new_quaternion)
+            prev_loc, applied_orientation = rhs[loc]
+            piece, prev_orientation = self.cube[prev_loc]
+            new_orientation = orientation_multiply(prev_orientation, applied_orientation)
+            new_cube[loc] = (piece, new_orientation)
         return Cube(new_cube)
     
     def __eq__ ( self, rhs ) :
-        for i in range(20) :
-            ql = self.cube[i][1]
-            qr = rhs[i][1]
-
-            if abs(ql[0]) - abs(qr[0]) > 0.0001 :
+        for loc in range(20) :
+            if self.cube[loc] != rhs[loc] :
                 return False
-            for j in range(1, 4) :
-                if abs(ql[j] - qr[j]) > 0.0001 :
-                    return False
         return True
 
-def permutation ( cyclic_permutation = [], rotation = (1, 0, 0, 0) ) :
+def permutation ( cyclic_permutations = [], rotation = [0, 1, 2, 3, 4, 5] ) :
     cube = [None] * 20
     for i in range(20) :
-        cube[i] = (i, (1, 0, 0, 0))
+        cube[i] = (i, [0, 1, 2, 3, 4, 5])
     
-    for i, j in cyclic_permutation :
-        cube[i] = (j, rotation)
+    for cyclic_permutation in cyclic_permutations :
+        for i in range(len(cyclic_permutation)) :
+            j = cyclic_permutation[i]
+            k = cyclic_permutation[(i+1) % len(cyclic_permutation)]
+            cube[j] = (k, rotation)
 
     return Cube(cube)
 
-a  = 0.7071067811865476 # 90/2 angle
-        
 I  = permutation() # Identity
-Rc = permutation([( 1, 13), ( 3,  1), (13, 15), (15,  3), ( 6,  9), ( 9, 18), (11,  6), (18, 11)], (a,  a,  0,  0)) # Red counterclockwise
-O  = permutation([( 0, 12), ( 2,  0), (12, 14), (14,  2), ( 5,  8), ( 8, 17), (10,  5), (17, 10)], (a,  a,  0,  0)) # Orange clockwise
-R  = permutation([( 1,  3), ( 3, 15), (13,  1), (15, 13), ( 6, 11), ( 9,  6), (11, 18), (18,  9)], (a, -a,  0,  0)) # Red clockwise
-Oc = permutation([( 0,  2), ( 2, 14), (12,  0), (14, 12), ( 5, 17), ( 8,  5), (10,  8), (17, 10)], (a, -a,  0,  0)) # Orange counterclockwise
-W  = permutation([(12, 13), (13, 15), (14, 12), (15, 14), (16, 18), (17, 16), (18, 19), (19, 17)], (a,  0,  a,  0)) # White clockwise
-Yc = permutation([( 0,  1), ( 1,  3), ( 2,  0), ( 3,  2), ( 4,  6), ( 5,  4), ( 6,  7), ( 7,  5)], (a,  0,  a,  0)) # Yellow counterclockwise
-Wc = permutation([(12, 14), (13, 12), (14, 15), (15, 13), (16, 17), (17, 19), (18, 16), (19, 18)], (a,  0, -a,  0)) # White counterclockwise
-Y  = permutation([( 0,  2), ( 1,  0), ( 2,  3), ( 3,  1), ( 4,  5), ( 5,  7), ( 6,  4), ( 7,  6)], (a,  0, -a,  0)) # Yellow clockwise
-Bc = permutation([( 2,  3), ( 3, 15), (14,  2), (15, 14), ( 7, 11), (10,  7), (11, 19), (19, 10)], (a,  0,  0,  a)) # Blue counterclockwise
-G  = permutation([( 0,  1), ( 1, 13), (12,  0), (13, 12), ( 4,  9), ( 8,  4), ( 9, 16), (16,  8)], (a,  0,  0,  a)) # Green clockwise
-B  = permutation([( 2, 14), ( 3,  2), (14, 15), (15,  3), ( 7, 10), (10, 19), (11,  7), (19, 11)], (a,  0,  0, -a)) # Blue clockwise
-Gc = permutation([( 0, 12), ( 1,  0), (12, 13), (13,  1), ( 4,  8), ( 8, 16), ( 9,  4), (16,  9)], (a,  0,  0, -a)) # Green counterclockwise
+Rc = permutation([[ 1, 13, 15,  3], [ 6,  9, 18, 11]], [4, 1, 0, 3, 5, 2]) # Red counterclockwise
+O  = permutation([[ 0, 12, 14,  2], [ 5,  8, 17, 10]], [4, 1, 0, 3, 5, 2]) # Orange clockwise
+R  = permutation([[ 1,  3, 15, 13], [ 6, 11, 18,  9]], [2, 1, 5, 3, 0, 4]) # Red clockwise
+Oc = permutation([[ 0,  2, 14, 12], [ 5, 10, 17,  8]], [2, 1, 5, 3, 0, 4]) # Orange counterclockwise
+W  = permutation([[12, 13, 15, 14], [16, 18, 19, 17]], [0, 4, 1, 2, 3, 5]) # White clockwise
+Yc = permutation([[ 0,  1,  3,  2], [ 4,  6,  7,  5]], [0, 4, 1, 2, 3, 5]) # Yellow counterclockwise
+Wc = permutation([[12, 14, 15, 13], [16, 17, 19, 18]], [0, 2, 3, 4, 1, 5]) # White counterclockwise
+Y  = permutation([[ 0,  2,  3,  1], [ 4,  5,  7,  6]], [0, 2, 3, 4, 1, 5]) # Yellow clockwise
+Bc = permutation([[ 2,  3, 15, 14], [ 7, 11, 19, 10]], [3, 0, 2, 5, 4, 1]) # Blue counterclockwise
+G  = permutation([[ 0,  1, 13, 12], [ 4,  9, 16,  8]], [3, 0, 2, 5, 4, 1]) # Green clockwise
+B  = permutation([[ 2, 14, 15,  3], [ 7, 10, 19, 11]], [1, 5, 2, 0, 4, 3]) # Blue clockwise
+Gc = permutation([[ 0, 12, 13,  1], [ 4,  8, 16,  9]], [1, 5, 2, 0, 4, 3]) # Green counterclockwise
 
 class Interface :
 
@@ -135,38 +210,45 @@ class Interface :
         self.commands = {
             "q" : ("Quit", exit),
             "r" : ("Red clockwise", lambda cube : cube * R),
+            "r2" : ("Red twice", lambda cube : cube * R * R),
             "rc" : ("Red counterclockwise", lambda cube : cube * Rc),
             "o" : ("Orange clockwise", lambda cube : cube * O),
+            "o2" : ("Orange twice", lambda cube : cube * O * O),
             "oc" : ("Orange counterclockwise", lambda cube : cube * Oc),
             "w" : ("White clockwise", lambda cube : cube * W),
+            "w2" : ("White twice", lambda cube : cube * W * W),
             "wc" : ("White counterclockwise", lambda cube : cube * Wc),
             "y" : ("Yellow clockwise", lambda cube : cube * Y),
+            "y2" : ("Yellow twice", lambda cube : cube * Y * Y),
             "yc" : ("Yellow counterclockwise", lambda cube : cube * Yc),
             "b" : ("Blue clockwise", lambda cube : cube * B),
+            "b2" : ("Blue twice", lambda cube : cube * B * B),
             "bc" : ("Blue counterclockwise", lambda cube : cube * Bc),
             "g" : ("Green clockwise", lambda cube : cube * G),
+            "g2" : ("Green twice", lambda cube : cube * G * G),
             "gc" : ("Green counterclockwise", lambda cube : cube * Gc),
             "i" : ("Identity", lambda cube : I),
             "s" : ("Sexy move", lambda cube : cube * R * Y * Rc * Yc),
-
-            "U" : ("Up", lambda cube : cube * W),
-            "U2" : ("Up twice", lambda cube : cube * W * W),
-            "U'" : ("Up counterclockwise", lambda cube : cube * Wc),
-            "D" : ("Down", lambda cube : cube * Y),
-            "D2" : ("Down twice", lambda cube : cube * Y * Y),
-            "D'" : ("Down counterclockwise", lambda cube : cube * Yc),
-            "L" : ("Left", lambda cube : cube * O),
-            "L2" : ("Left twice", lambda cube : cube * O * O),
-            "L'" : ("Left counterclockwise", lambda cube : cube * Oc),
-            "R" : ("Right", lambda cube : cube * R),
-            "R2" : ("Right twice", lambda cube : cube * R * R),
-            "R'" : ("Right counterclockwise", lambda cube : cube * Rc),
-            "F" : ("Front", lambda cube : cube * G),
-            "F2" : ("Front twice", lambda cube : cube * G * G),
-            "F'" : ("Front counterclockwise", lambda cube : cube * Gc),
-            "B" : ("Back", lambda cube : cube * B),
-            "B2" : ("Back twice", lambda cube : cube * B * B),
-            "B'" : ("Back counterclockwise", lambda cube : cube * Bc),
+        }
+        self.aliases = {
+            "U" : "w",
+            "U2" : "w2",
+            "U'" : "wc",
+            "D" : "y",
+            "D2" : "y2",
+            "D'" : "yc",
+            "L" : "o",
+            "L2" : "o2",
+            "L'" : "oc",
+            "R" : "r",
+            "R2" : "r2",
+            "R'" : "rc",
+            "F" : "g",
+            "F2" : "g2",
+            "F'" : "gc",
+            "B" : "b",
+            "B2" : "b2",
+            "B'" : "bc",
         }
     
     def run ( self, cube, command_queue, debug = False ) :
@@ -178,11 +260,12 @@ class Interface :
                 if debug :
                     print(self.commands[command][0])
                 cube = self.commands[command][1](cube)
+            elif command in self.aliases :
+                command_queue.insert(0, self.aliases[command])
             else :
                 print(f"Invalid command: {command}\n")
         return cube
     
-
 if __name__ == "__main__" :
     cube = I
     while True :
@@ -190,4 +273,3 @@ if __name__ == "__main__" :
         command_queue = command_input.split(" ")
         cube = Interface().run(cube, command_queue)
         print(cube)
-        
