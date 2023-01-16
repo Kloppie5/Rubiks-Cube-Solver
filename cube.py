@@ -64,12 +64,15 @@ class Cube :
     def __init__ ( self, cube ) :
         self.cube = cube
 
-    def __str__ ( self ) :
+    def matrix_representation ( self ) :
         r = ""
         for i in range(20) :
             piece, orientation = self.cube[i]
             r += f"{'.'*piece}X{'.'*(19-piece)} | {Cube.pieces[piece]['colors']} | {orientation}\n"
-        r += "\n"
+        return r
+
+    def net_representation ( self ) :
+        r = ""
         net = [['.' for _ in range(12)] for _ in range(9)]
         net[1][4] = 'W'
         net[4][1] = 'O'
@@ -159,6 +162,111 @@ class Cube :
         
         return r
     
+    def isometric_representation ( self ) :
+        screen = ""
+
+        replacements = [
+            ("A", 14, 5),
+            ("M", 19, 5),
+            ("a", 15, 5),
+            ("B", 17, 5),
+            ("b", 18, 5),
+            ("C", 12, 5),
+            ("O", 16, 5),
+            ("c", 13, 5),
+
+            ("D", 12, 4),
+            ("d", 13, 4),
+            ("E", 8, 4),
+            ("e", 9, 4),
+            ("F", 0, 4),
+            ("f", 1, 4),
+            ("P", 16, 4),
+            ("R", 4, 4),
+            
+            ("m", 13, 3),
+            ("n", 18, 3),
+            ("o", 15, 3),
+            ("p", 9, 3),
+            ("r", 11, 3),
+            ("s", 1, 3),
+            ("t", 6, 3),
+            ("u", 3, 3),
+        ]
+        template = """
+                            ...........                                   
+                         ....AAAAAAAA.........                            
+                      ........AAAAAAA.....MM........                      
+                   ....BBBBB...........MMMMMMMMMMM.........               
+                ....BBBBBBBBBBB.............MMM....aaaaaaa......          
+             ....CC........B.....NNNNNNNNN.........aaaaaaaa.....          
+          ....CCCCCCCCCCC.........NNNNNN.....bbbb...........ooo.          
+          ........CCCC....OOOOOOO.........bbbbbbbbbbb....oooooo.          
+          .DDDDD.........OOOOOOOOO..............bb....nn.oooooo.          
+          .DDDDDDDDD..P.............cccccccccc.....nnnnn.oooooo.          
+          .DDDDDDDDD..PPPPPPPP.........ccccc....m.nnnnnn.oooo...          
+          .DDDDDDDDD..PPPPPPPPP.ddddd........mmmm.nnnnnn.o......          
+          ...DDDDDDD..PPPPPPPPP.dddddddddd.mmmmmm.nnnnn.....rrr.          
+          ............PPPPPPPPP.dddddddddd.mmmmmm.nn.....rrrrrr.          
+          .EEEEEE..........PPPP.dddddddddd.mmmmmm.....qq.rrrrrr.          
+          .EEEEEEEEE..QQ..........dddddddd.mmm.....qqqqq.rrrrrr.          
+          .EEEEEEEEE..QQQQQQQQQ..........d.....pp.qqqqqq.rrrr...          
+          .EEEEEEEEE..QQQQQQQQQ.eeeeee......ppppp.qqqqqq.r....u.          
+          ....EEEEEE..QQQQQQQQQ.eeeeeeeeee.pppppp.qqqqq....uuuu.          
+          .F..........QQQQQQQQQ.eeeeeeeeee.pppppp.q......uuuuuu.          
+          .FFFFFFFF.........QQQ.eeeeeeeeee.ppppp.....ttt.uuuuuu.          
+          .FFFFFFFFF..RRRR.........eeeeeee.pp.....tttttt.uuuuuu.          
+          .FFFFFFFFF..RRRRRRRRR.f..............ss.tttttt.uuu....          
+          .FFFFFFFFF..RRRRRRRRR.ffffffff....sssss.tttttt.....             
+          ......FFFF..RRRRRRRRR.ffffffffff.ssssss.tttt....                
+              .........RRRRRRRR.ffffffffff.ssssss.t....                   
+                     .........R.ffffffffff.sssss....                      
+                            .........fffff.ss....                         
+                                   ...........
+        """
+        for line in template.splitlines() :
+            for i in range(len(line)) :  
+                if line[i] == "N" :
+                    screen += "W"
+                elif line[i] == "Q" :
+                    screen += "G"
+                elif line[i] == "q" :
+                    screen += "R"
+                else :
+                  for char, piece, dir in replacements :
+                      if line[i] == char :
+                          screen += Cube.face_colors[self.cube[piece][1][dir]]
+                          break
+                  else :
+                      screen += line[i]
+            screen += "\n"
+        command_colors = {
+            'W' : '7',
+            'O' : '5',
+            'G' : '2',
+            'R' : '1',
+            'B' : '4',
+            'Y' : '3'
+        }
+        r = ""
+        for i in range(len(screen)) :
+            if screen[i] in command_colors :
+                r += f"\033[1;3{command_colors[screen[i]][0]}m░\033[0m"
+            elif screen[i] == "." :
+                r += f"\033[30m█\033[0m"
+            else :
+                r += screen[i]
+
+        return r
+
+    def __str__ ( self ) :
+        r = self.matrix_representation()
+        r += "\n"
+        r += self.net_representation()
+        r += "\n"
+        r += self.isometric_representation()
+        return r
+    
     def __getitem__ ( self, loc ) :
         return self.cube[loc]
 
@@ -228,7 +336,6 @@ class Interface :
             "g2" : ("Green twice", lambda cube : cube * G * G),
             "gc" : ("Green counterclockwise", lambda cube : cube * Gc),
             "i" : ("Identity", lambda cube : I),
-            "s" : ("Sexy move", lambda cube : cube * R * Y * Rc * Yc),
         }
         self.aliases = {
             "U" : "w",
@@ -249,6 +356,9 @@ class Interface :
             "B" : "b",
             "B2" : "b2",
             "B'" : "bc",
+            "Sune" : "R U R' U R U2 R' U2",
+            "Sexy" : "R U R' U'"
+            
         }
     
     def run ( self, cube, command_queue, debug = False ) :
@@ -261,7 +371,7 @@ class Interface :
                     print(self.commands[command][0])
                 cube = self.commands[command][1](cube)
             elif command in self.aliases :
-                command_queue.insert(0, self.aliases[command])
+                command_queue = self.aliases[command].split(" ") + command_queue
             else :
                 print(f"Invalid command: {command}\n")
         return cube
