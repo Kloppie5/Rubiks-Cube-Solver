@@ -28,7 +28,7 @@ class Cube :
 
         f f lba otv iuw mgnhcxyz jkpqrs  i- lll
         g g cmx rou wjq nyblhzfa vskitp  j- mmm negative roots
-        h h znq sot wkl agxbfmcp urvyji  k- nnn
+        h h yzn qso twk lagxbfmc purvji  k- nnn
 
         p p uqt zac nlm wsijvrko hyfbxg  ij lm
         q q tpu ylg hax rvjiswok nzbfmc  ij- lmmm two quarter turns
@@ -161,7 +161,7 @@ class Cube :
         "n": { "l": "p", "m": "v", "n": "k" },
         "f": { "l": "o", "m": "t", "n": "v" },
         "g": { "l": "r", "m": "o", "n": "u" },
-        "h": { "l": "s", "m": "o", "n": "t" },
+        "h": { "l": "q", "m": "s", "n": "o" },
         "p": { "l": "z", "m": "a", "n": "c" },
         "q": { "l": "y", "m": "l", "n": "g" },
         "r": { "l": "c", "m": "n", "n": "b" },
@@ -179,10 +179,25 @@ class Cube :
     }
 
     def __init__ ( self, state ) :
-        self.state = state.replace(" ", "")
+        self.state = state.replace(" ", "").replace("-", "o")
+        if not self.valid() :
+            raise ValueError("Invalid cube state: " + self.state)
     
-    def repr_str ( self ) :
+    def valid ( self ) :
+        return all(c in self.repr_pos_str() for c in Cube.piece_letters)
+
+    def repr_orient_str ( self ) :
         return self.state[0:8] + " " + self.state[8:20] + " " + self.state[20:26]
+
+    def repr_pos_str ( self ) :
+        pos = []
+        for i, c in enumerate(self.state) :
+            letter = Cube.piece_letters[i]
+            dec = Cube.operation_decomposition[c]
+            for d in dec :
+                letter = Cube.operation_table[letter][d]
+            pos.append(letter)
+        return "".join(pos)
 
     def repr_matrix ( self ) :
         for i, c in enumerate(self.state) :
@@ -200,35 +215,49 @@ class Cube :
                 print(f"{' '*20}{'-'*(pos-20)}{c}{'-'*(25-pos)} {letter}")
         return self.state
 
+    def true_equal ( self, other ) :
+        return self.state == other.state
+    
+    def __eq__ ( self, other ) :
+        return self.repr_pos_str() == other.repr_pos_str()
+
+    def __mul__ ( self, other ) :
+        state = [None]*26
+        for i, orientation in enumerate(self.state) :
+            letter = Cube.piece_letters[i]
+            for d in Cube.operation_decomposition[orientation] :
+                letter = Cube.operation_table[letter][d]
+            other_orientation = other.state[Cube.piece_letters.index(letter)]
+            for d in Cube.operation_decomposition[other_orientation] :
+                letter = Cube.operation_table[letter][d]
+                orientation = Cube.operation_table[orientation][d]
+
+            state[Cube.piece_letters.index(letter)] = orientation
+
+        return Cube("".join(state))
+
     def __str__ ( self ) :
         return self.repr_matrix()
 
 if __name__ == "__main__" :
-    cube = Cube("oooooooo oooooooooooo oooooo")
+    I  = Cube("oooooooo oooooooooooo oooooo")
 
-    Y    = Cube("ggggoooo ggggoooooooo gooooo")
-    Yc   = Cube("mmmmoooo mmmmoooooooo gooooo")
-    W    = Cube("oooommmm oooooooommmm omoooo")
-    Wc   = Cube("oooogggg oooooooogggg ogoooo")
-    G    = Cube("hhoooooo hooohhoohooo oohooo")
-    Gc   = Cube("nnoooooo nooonnoonooo oonooo")
-    B    = Cube("oonnoooo onoooonnonoo ooonoo")
-    Bc   = Cube("oohhoooo ohoooohhohoo ooohoo")
-    O    = Cube("lolololo oolololooolo oooolo")
-    Oc   = Cube("fofofofo oofofofooofo oooofo")
-    R    = Cube("ofofofof ooofofofooof ooooof")
-    Rc   = Cube("olololol ooolololoool oooool")
+    Ym = Cube("mmmm---- mmmm-------- m-----")
+    Yg = Cube("gggg---- gggg-------- g-----")
+    Wm = Cube("----mmmm --------mmmm -m----")
+    Wg = Cube("----gggg --------gggg -g----")
+    Gn = Cube("nn--nn-- n---nn--n--- --n---")
+    Gh = Cube("hh--hh-- h---hh--h--- --h---")
+    Bn = Cube("--nn--nn -n----nn-n-- ---n--")
+    Bh = Cube("--hh--hh -h----hh-h-- ---h--")
+    Ol = Cube("l-l-l-l- --l-l-l---l- ----l-")
+    Of = Cube("f-f-f-f- --f-f-f---f- ----f-")
+    Rf = Cube("-f-f-f-f ---f-f-f---f -----f")
+    Rl = Cube("-l-l-l-l ---l-l-l---l -----l")
 
-    print(cube)
-    print(Y)
-    print(Yc)
-    print(W)
-    print(Wc)
-    print(G)
-    print(Gc)
-    print(B)
-    print(Bc)
-    print(O)
-    print(Oc)
-    print(R)
-    print(Rc)
+    print(Ym * Yg == I)
+    print(Wm * Wg == I)
+    print(Gn * Gh == I)
+    print(Bn * Bh == I)
+    print(Ol * Of == I)
+    print(Rf * Rl == I)
