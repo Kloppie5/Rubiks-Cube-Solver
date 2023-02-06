@@ -8,6 +8,8 @@ class Cube :
 
         This is internally kept as a dictionary of piece names to rotation operations, as to not be tied to a specific order of pieces.
     """
+    standard_order = ["WGO", "WGR", "WBO", "WBR", "YGO", "YGR", "YBO", "YBR", "WG", "WB", "WO", "WR", "YG", "YB", "YO", "YR", "GO", "GR", "BO", "BR", "W", "Y", "G", "B", "O", "R"]
+
     position_table = {
         #WG        i      j      k
         "WGO" : ["YGO", "WGR", "YGO"],
@@ -128,16 +130,6 @@ class Cube :
         "YR" : "ijk",    # z 3 i(ij) (ij)k
     }
 
-    def find_pos ( self, piece, orientation ) :
-        for step in Cube.rotation_decomposition[orientation] :
-            piece = Cube.position_table[piece]["ijk".index(step)]
-        return piece
-
-    def rotate ( self, orientation, rotation ) :
-        for step in Cube.rotation_decomposition[orientation] :
-            rotation = Cube.rotation_table[rotation]["ijk".index(step)]
-        return rotation
-
     def __init__ ( self, state = "-------- ------------ ------" ) :
         if isinstance(state, str) :
             state = state.replace(" ", "").replace("-", "o")
@@ -175,9 +167,91 @@ class Cube :
         elif isinstance(state, dict) :
             self.state = state
 
+    def find_pos ( self, piece, orientation ) :
+        for step in Cube.rotation_decomposition[orientation] :
+            piece = Cube.position_table[piece]["ijk".index(step)]
+        return piece
+
+    def rotate ( self, orientation, rotation ) :
+        for step in Cube.rotation_decomposition[orientation] :
+            rotation = Cube.rotation_table[rotation]["ijk".index(step)]
+        return rotation
+
+    def get_position_color ( self, piece, direction ) :
+        pass
+
     def repr_orient_str ( self ) :
-        return "".join([Cube.rotation_shorthand[self.state[piece]] for piece in ["WGO", "WGR", "WBO", "WBR", "YGO", "YGR", "YBO", "YBR", "WG", "WB", "WO", "WR", "YG", "YB", "YO", "YR", "GO", "GR", "BO", "BR", "W", "Y", "G", "B", "O", "R"]])
+        state = [Cube.rotation_shorthand[self.state[piece]] for piece in Cube.standard_order]
+        try :
+            state = "".join(state)
+        except TypeError :
+            raise Exception(f"Invalid state: {self.state}")
+        return state
     
+    def repr_inv_orient_str ( self ) :
+        state = [None]*len(self.state)
+        for piece, orientation in self.state.items() :
+            pos = self.find_pos(piece, orientation)
+            state[Cube.standard_order.index(pos)] = Cube.rotation_shorthand[orientation]
+        try :
+            state = "".join(state)
+        except TypeError :
+            raise Exception(f"Invalid state: {self.state}")
+        return state
+
+    def repr_isometric ( self ) :
+        template = """
+                        ..                        
+                      ..aa..                      
+                    ..aaaaaa..                    
+                  ..aaaaaaaaaa..                  
+                ..aaaaaaaaaaaaaa..                
+              ..bb..aaaaaaaaaa..cc..              
+            ..bbbbbb..aaaaaa..cccccc..            
+          ..bbbbbbbbbb..aa..cccccccccc..          
+        ..bbbbbbbbbbbbbb..cccccccccccccc..        
+      ..dd..bbbbbbbbbb..ee..cccccccccc..ff..      
+    ..dddddd..bbbbbb..eeeeee..cccccc..ffffff..    
+  ..dddddddddd..bb..eeeeeeeeee..cc..ffffffffff..  
+..dddddddddddddd..eeeeeeeeeeeeee..ffffffffffffff..
+.j..dddddddddd..gg..eeeeeeeeee..hh..ffffffffff..s.
+.jjj..dddddd..gggggg..eeeeee..hhhhhh..ffffff..sss.
+.jjjjj..dd..gggggggggg..ee..hhhhhhhhhh..ff..sssss.
+.jjjjjjj..gggggggggggggg..hhhhhhhhhhhhhh..sssssss.
+.jjjjjjj.l..gggggggggg..ii..hhhhhhhhhh..t.sssssss.
+.jjjjjjj.lll..gggggg..iiiiii..hhhhhh..ttt.sssssss.
+..jjjjjj.lllll..gg..iiiiiiiiii..hh..ttttt.ssssss..
+.k..jjjj.lllllll..iiiiiiiiiiiiii..ttttttt.ssss..u.
+.kkk..jj.lllllll.o..iiiiiiiiii..v.ttttttt.ss..uuu.
+.kkkkk...lllllll.ooo..iiiiii..vvv.ttttttt...uuuuu.
+.kkkkkkk..llllll.ooooo..ii..vvvvv.tttttt..uuuuuuu.
+.kkkkkkk.n..llll.ooooooo..vvvvvvv.tttt..w.uuuuuuu.
+.kkkkkkk.nnn..ll.ooooooo..vvvvvvv.tt..www.uuuuuuu.
+..kkkkkk.nnnnn...ooooooo..vvvvvvv...wwwww.uuuuuu..
+.m..kkkk.nnnnnnn..oooooo..vvvvvv..wwwwwww.uuuu..x.
+.mmm..kk.nnnnnnn.q..oooo..vvvv..y.wwwwwww.uu..xxx.
+.mmmmm...nnnnnnn.qqq..oo..vv..yyy.wwwwwww...xxxxx.
+.mmmmmmm..nnnnnn.qqqqq......yyyyy.wwwwww..xxxxxxx.
+.mmmmmmm.p..nnnn.qqqqqqq..yyyyyyy.wwww..z.xxxxxxx.
+.mmmmmmm.ppp..nn.qqqqqqq..yyyyyyy.ww..zzz.xxxxxxx.
+..mmmmmm.ppppp...qqqqqqq..yyyyyyy...zzzzz.xxxxxx..
+  ..mmmm.ppppppp..qqqqqq..yyyyyy..zzzzzzz.xxxx..  
+    ..mm.ppppppp.r..qqqq..yyyy..A.zzzzzzz.xx..    
+      ...ppppppp.rrr..qq..yy..AAA.zzzzzzz...      
+        ..pppppp.rrrrr......AAAAA.zzzzzz..        
+          ..pppp.rrrrrrr..AAAAAAA.zzzz..          
+            ..pp.rrrrrrr..AAAAAAA.zz..            
+              ...rrrrrrr..AAAAAAA...              
+                ..rrrrrr..AAAAAA..                
+                  ..rrrr..AAAA..                  
+                    ..rr..AA..                    
+                      ......                      
+                        ..                        
+""".splitlines()
+        for i in range(len(template)) :
+            print(f"\"{template[i]}  |  {template[len(template)-1-i]}\"")
+        return template
+
     def __mul__ ( self, other ) :
         if not isinstance(other, Cube) :
             raise Exception("Can only multiply a cube by another cube")
@@ -190,14 +264,14 @@ class Cube :
         return Cube(new_state)
 
     def __str__ ( self ) :
-        return self.repr_orient_str()
+        return f"{self.repr_orient_str()} | {self.repr_inv_orient_str()}\n{self.repr_isometric()}"
 
 if __name__ == "__main__" :
     I  = Cube("oooo oooo oooo oooo oooo oooooo")
 
     Wj = Cube("jjjj ---- jjjj ---- ---- j-----")
     Cj = Cube("---- ---- ---- ---- jjjj --jjjj")
-    Yj = Cube("---- jjjj ---- jjjj ---- -i----")
+    Yj = Cube("---- jjjj ---- jjjj ---- -j----")
     Wg = Cube("gggg ---- gggg ---- ---- g-----")
     Cg = Cube("---- ---- ---- ---- gggg --gggg")
     Yg = Cube("---- gggg ---- gggg ---- -g----")
