@@ -100,90 +100,63 @@ class Cube :
         "BY" : "y",
         "YR" : "z",
     }
-    rotation_decomposition = {
-        "WG" : "",       # o 0 identity
-
-        "BW" : "i",      # i 1 i
-        "GY" : "iii",    # f 1 (iii)
-        "WO" : "j",      # j 1 j
-        "WR" : "jjj",    # g 1 (jjj)
-        "RG" : "k",      # k 1 k
-        "OG" : "kkk",    # h 1 (kkk)
-        
-        "YB" : "ii",     # l 2 ii
-        "WB" : "jj",     # m 2 jj
-        "YG" : "kk",     # n 2 kk
-
-        "GO" : "jk",     # p 2 (iii)-j-k
-        "BR" : "ki",     # q 2 i-(jjj)-k
-        "BO" : "ij",     # r 2 i-j-(kkk)
-        "GR" : "iiijjj", # s 2 (iii)-(jjj)-(kkk)
-
-        "OW" : "ikkk",   # t 2 i-(kkk)-(jjj)
-        "RY" : "kjjj",   # u 2 (iii)-k-(jjj)
-        "OY" : "jiii",   # v 2 (iii)-(kkk)-j
-        "RW" : "ik",     # w 2 i-k-j
-
-        "YO" : "iij",    # a 3 iij
-        "RB" : "iik",    # b 3 iik
-        "GW" : "jji",    # c 3 jji
-        "OB" : "jjk",    # x 3 jjk
-        "BY" : "kki",    # y 3 kki
-        "YR" : "kkj",    # z 3 kkj
+    operation_table = {
+        "WG": {"sym": "-", "dist": 0, "dec": ""},       # identity
+        "BW": {"sym": "i", "dist": 1, "dec": "i"},      # i
+        "GY": {"sym": "f", "dist": 1, "dec": "iii"},    # (iii)
+        "WO": {"sym": "j", "dist": 1, "dec": "j"},      # j
+        "WR": {"sym": "g", "dist": 1, "dec": "jjj"},    # (jjj)
+        "RG": {"sym": "k", "dist": 1, "dec": "k"},      # k
+        "OG": {"sym": "h", "dist": 1, "dec": "kkk"},    # (kkk)
+        "YB": {"sym": "l", "dist": 2, "dec": "ii"},     # ii
+        "WB": {"sym": "m", "dist": 2, "dec": "jj"},     # jj
+        "YG": {"sym": "n", "dist": 2, "dec": "kk"},     # kk
+        "GO": {"sym": "p", "dist": 2, "dec": "jk"},     # (iii)-j-k
+        "BR": {"sym": "q", "dist": 2, "dec": "ki"},     # i-(jjj)-k
+        "BO": {"sym": "r", "dist": 2, "dec": "ij"},     # i-j-(kkk)
+        "GR": {"sym": "s", "dist": 2, "dec": "iiijjj"}, # (iii)-(jjj)-(kkk)
+        "OW": {"sym": "t", "dist": 2, "dec": "ikkk"},   # i-(kkk)-(jjj)
+        "RY": {"sym": "u", "dist": 2, "dec": "kjjj"},   # (iii)-k-(jjj)
+        "OY": {"sym": "v", "dist": 2, "dec": "jiii"},   # (iii)-(kkk)-j
+        "RW": {"sym": "w", "dist": 2, "dec": "ik"},     # i-k-j
+        "YO": {"sym": "a", "dist": 3, "dec": "iij"},    # iij
+        "RB": {"sym": "b", "dist": 3, "dec": "iik"},    # iik
+        "GW": {"sym": "c", "dist": 3, "dec": "jji"},    # jji
+        "OB": {"sym": "x", "dist": 3, "dec": "jjk"},    # jjk
+        "BY": {"sym": "y", "dist": 3, "dec": "kki"},    # kki
+        "YR": {"sym": "z", "dist": 3, "dec": "kkj"},    # kkj
     }
 
     def __init__ ( self, state = "-------- ------------ ------" ) :
         if isinstance(state, str) :
-            state = state.replace(" ", "").replace("-", "o")
-            state = [list(Cube.rotation_shorthand.keys())[list(Cube.rotation_shorthand.values()).index(c)] for c in state]
-            self.state = {
-                "WGO" : state[0],
-                "WGR" : state[1],
-                "WBO" : state[2],
-                "WBR" : state[3],
-                "YGO" : state[4],
-                "YGR" : state[5],
-                "YBO" : state[6],
-                "YBR" : state[7],
-
-                "WG" : state[8],
-                "WB" : state[9],
-                "WO" : state[10],
-                "WR" : state[11],
-                "YG" : state[12],
-                "YB" : state[13],
-                "YO" : state[14],
-                "YR" : state[15],
-                "GO" : state[16],
-                "GR" : state[17],
-                "BO" : state[18],
-                "BR" : state[19],
-
-                "W" : state[20],
-                "Y" : state[21],
-                "G" : state[22],
-                "B" : state[23],
-                "O" : state[24],
-                "R" : state[25],
-            }
+            state = state.replace(" ", "")
+            self.state = {}
+            for i in range(len(state)) :
+                for k, v in Cube.operation_table.items() :
+                    if v["sym"] == state[i] :
+                        self.state[Cube.standard_order[i]] = k
+                        break
         elif isinstance(state, dict) :
             self.state = state
 
     def find_pos ( self, piece, orientation ) :
-        for step in Cube.rotation_decomposition[orientation] :
+        for step in Cube.operation_table[orientation]["dec"] :
             piece = Cube.position_table[piece]["ijk".index(step)]
         return piece
 
     def rotate ( self, orientation, rotation ) :
-        for step in Cube.rotation_decomposition[rotation] :
+        for step in Cube.operation_table[rotation]["dec"] :
             orientation = Cube.rotation_table[orientation]["ijk".index(step)]
         return orientation
 
     def get_position_color ( self, piece, direction ) :
         pass
 
+    def distance ( self ) :
+        return sum([Cube.operation_table[orientation]["dist"] for orientation in self.state.values()])
+
     def repr_orient_str ( self ) :
-        state = [Cube.rotation_shorthand[self.state[piece]] for piece in Cube.standard_order]
+        state = [Cube.operation_table[self.state[piece]]["sym"] for piece in Cube.standard_order]
         try :
             state = "".join(state)
         except TypeError :
@@ -196,7 +169,7 @@ class Cube :
             pos = self.find_pos(piece, orientation)
             if state[Cube.standard_order.index(pos)] is not None :
                 raise Exception(f"Invalid state: {self.state}; {pos} is already occupied by {state[Cube.standard_order.index(pos)]}")
-            state[Cube.standard_order.index(pos)] = Cube.rotation_shorthand[orientation]
+            state[Cube.standard_order.index(pos)] = Cube.operation_table[orientation]["sym"]
         state = "".join(state)
         
         return state
@@ -214,10 +187,10 @@ class Cube :
         return Cube(new_state)
 
     def __str__ ( self ) :
-        return f"{self.repr_orient_str()} | {self.repr_inv_orient_str()}"
+        return f"{self.repr_orient_str()} | {self.distance()} | {self.repr_inv_orient_str()}"
 
 if __name__ == "__main__" :
-    I  = Cube("oooo oooo oooo oooo oooo oooooo")
+    I  = Cube()
 
     Wj = Cube("jjjj ---- jjjj ---- ---- j-----")
     Cj = Cube("---- ---- ---- ---- jjjj --jjjj")
@@ -240,20 +213,31 @@ if __name__ == "__main__" :
     Cf = Cube("---- ---- ff-- ff-- ---- ffff--")
     Rf = Cube("-f-f -f-f ---f ---f -f-f -----f")
 
-    """
-        R  Rf
-        R' Ri
-        U  Wg
-        U' Wj
-        F  Gh
-        F' Gk
-    """
 
-    print(f"Rf          : {Rf}")
-    print(f"     Wg     : {Wg}")
-    print(f"          Ri: {Ri}")
-    print(f"Rf * Wg     : {Rf * Wg}")
-    print(f"Rf      * Ri: {Rf * Ri}")
-    print(f"     Wg * Ri: {Wg * Ri}")
-    print(f"Rf * Wg * Ri: {Rf * Wg * Ri}")
-    print()
+    R = Rf
+    Rp = Ri
+    U = Wg
+    Up = Wj
+    F = Gh
+    Fp = Gk
+
+    sexy = R * U * Rp * Up
+    print(f"Cross 1: {F * sexy * Fp}")
+    print(f"Cross 2: {F * sexy * sexy * Fp}")
+    print(f"Cross 3: {F * sexy * sexy * sexy * Fp}")
+
+    print(f"OLL Sune: {R * U * Rp * U * R * U * U * Rp * U * U}")
+
+    print(f"Nb:")
+    cube = I
+    Nb = [Rp, U, R, Up, Rp, Fp, Up, F, R, U, Rp, F, Rp, Fp, R, Up, R]
+    for step in Nb :
+        cube *= step
+        print(f"  {cube}")
+    
+    print(f"T:")
+    cube = I
+    T = [R, U, Rp, Up, Rp, F, R, R, Up, Rp, Up, R, U, Rp, Fp]
+    for step in T :
+        cube *= step
+        print(f"  {cube}")
