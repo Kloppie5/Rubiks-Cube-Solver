@@ -40,6 +40,9 @@ class Cube :
         "R"   : [  "R",   "B",   "W"],
     }
     rotation_table = {
+        "i"  : ["i", "k", "jjj"],
+        "j"  : ["kkk", "j", "i"],
+        "k"  : ["j", "iii", "k"],
         #         i     j     k
         "WG" : ["BW", "WO", "RG"],
         "WB" : ["GW", "WR", "OB"],
@@ -82,19 +85,19 @@ class Cube :
         "YB" : "l",
         "WB" : "m",
         "YG" : "n",
-        "OW" : "p",
-        "OY" : "q",
-        "RY" : "r",
-        "RW" : "s",
-        "GO" : "t",
-        "BO" : "u",
-        "BR" : "v",
-        "GR" : "w",
+        "GO" : "p",
+        "BR" : "q",
+        "BO" : "r",
+        "GR" : "s",
+        "OW" : "t",
+        "RY" : "u",
+        "OY" : "v",
+        "RW" : "w",
         "YO" : "a",
-        "BY" : "b",
-        "OB" : "c",
-        "RB" : "x",
-        "GW" : "y",
+        "RB" : "b",
+        "GW" : "c",
+        "OB" : "x",
+        "BY" : "y",
         "YR" : "z",
     }
     rotation_decomposition = {
@@ -103,7 +106,6 @@ class Cube :
         "BW" : "i",      # i 1 i
         "GY" : "iii",    # f 1 (iii)
         "WO" : "j",      # j 1 j
-        
         "WR" : "jjj",    # g 1 (jjj)
         "RG" : "k",      # k 1 k
         "OG" : "kkk",    # h 1 (kkk)
@@ -112,22 +114,22 @@ class Cube :
         "WB" : "jj",     # m 2 jj
         "YG" : "kk",     # n 2 kk
 
-        "OW" : "ijjj",   # p 2 i-(jjj)-(kkk)
-        "OY" : "iiij",   # q 2 (iii)-j-(kkk)
-        "RY" : "jjjk",   # r 2 (iii)-(jjj)-k
-        "RW" : "ij",     # s 2 i-j-k
+        "GO" : "jk",     # p 2 (iii)-j-k
+        "BR" : "ki",     # q 2 i-(jjj)-k
+        "BO" : "ij",     # r 2 i-j-(kkk)
+        "GR" : "iiijjj", # s 2 (iii)-(jjj)-(kkk)
 
-        "GO" : "kj",     # t 2 (iii)-k-j
-        "BO" : "ji",     # u 2 i-(kkk)-j
-        "BR" : "ik",     # v 2 i-k-(jjj)
-        "GR" : "iiikkk", # w 2 (iii)-(kkk)-(jjj)
+        "OW" : "ikkk",   # t 2 i-(kkk)-(jjj)
+        "RY" : "kjjj",   # u 2 (iii)-k-(jjj)
+        "OY" : "jiii",   # v 2 (iii)-(kkk)-j
+        "RW" : "ik",     # w 2 i-k-j
 
-        "YO" : "jii",    # a 3 jii
-        "BY" : "jji",    # b 3 jji
-        "OB" : "iik",    # c 3 iik
-        "RB" : "iji",    # x 3 j(ij) (ij)i
-        "GW" : "ijj",    # y 3 k(ij) (ij)j
-        "YR" : "ijk",    # z 3 i(ij) (ij)k
+        "YO" : "iij",    # a 3 iij
+        "RB" : "iik",    # b 3 iik
+        "GW" : "jji",    # c 3 jji
+        "OB" : "jjk",    # x 3 jjk
+        "BY" : "kki",    # y 3 kki
+        "YR" : "kkj",    # z 3 kkj
     }
 
     def __init__ ( self, state = "-------- ------------ ------" ) :
@@ -173,9 +175,9 @@ class Cube :
         return piece
 
     def rotate ( self, orientation, rotation ) :
-        for step in Cube.rotation_decomposition[orientation] :
-            rotation = Cube.rotation_table[rotation]["ijk".index(step)]
-        return rotation
+        for step in Cube.rotation_decomposition[rotation] :
+            orientation = Cube.rotation_table[orientation]["ijk".index(step)]
+        return orientation
 
     def get_position_color ( self, piece, direction ) :
         pass
@@ -192,65 +194,12 @@ class Cube :
         state = [None]*len(self.state)
         for piece, orientation in self.state.items() :
             pos = self.find_pos(piece, orientation)
+            if state[Cube.standard_order.index(pos)] is not None :
+                raise Exception(f"Invalid state: {self.state}; {pos} is already occupied by {state[Cube.standard_order.index(pos)]}")
             state[Cube.standard_order.index(pos)] = Cube.rotation_shorthand[orientation]
-        try :
-            state = "".join(state)
-        except TypeError :
-            raise Exception(f"Invalid state: {self.state}")
+        state = "".join(state)
+        
         return state
-
-    def repr_isometric ( self ) :
-        template = """
-                        ..                        
-                      ..aa..                      
-                    ..aaaaaa..                    
-                  ..aaaaaaaaaa..                  
-                ..aaaaaaaaaaaaaa..                
-              ..bb..aaaaaaaaaa..cc..              
-            ..bbbbbb..aaaaaa..cccccc..            
-          ..bbbbbbbbbb..aa..cccccccccc..          
-        ..bbbbbbbbbbbbbb..cccccccccccccc..        
-      ..dd..bbbbbbbbbb..ee..cccccccccc..ff..      
-    ..dddddd..bbbbbb..eeeeee..cccccc..ffffff..    
-  ..dddddddddd..bb..eeeeeeeeee..cc..ffffffffff..  
-..dddddddddddddd..eeeeeeeeeeeeee..ffffffffffffff..
-.j..dddddddddd..gg..eeeeeeeeee..hh..ffffffffff..s.
-.jjj..dddddd..gggggg..eeeeee..hhhhhh..ffffff..sss.
-.jjjjj..dd..gggggggggg..ee..hhhhhhhhhh..ff..sssss.
-.jjjjjjj..gggggggggggggg..hhhhhhhhhhhhhh..sssssss.
-.jjjjjjj.l..gggggggggg..ii..hhhhhhhhhh..t.sssssss.
-.jjjjjjj.lll..gggggg..iiiiii..hhhhhh..ttt.sssssss.
-..jjjjjj.lllll..gg..iiiiiiiiii..hh..ttttt.ssssss..
-.k..jjjj.lllllll..iiiiiiiiiiiiii..ttttttt.ssss..u.
-.kkk..jj.lllllll.o..iiiiiiiiii..v.ttttttt.ss..uuu.
-.kkkkk...lllllll.ooo..iiiiii..vvv.ttttttt...uuuuu.
-.kkkkkkk..llllll.ooooo..ii..vvvvv.tttttt..uuuuuuu.
-.kkkkkkk.n..llll.ooooooo..vvvvvvv.tttt..w.uuuuuuu.
-.kkkkkkk.nnn..ll.ooooooo..vvvvvvv.tt..www.uuuuuuu.
-..kkkkkk.nnnnn...ooooooo..vvvvvvv...wwwww.uuuuuu..
-.m..kkkk.nnnnnnn..oooooo..vvvvvv..wwwwwww.uuuu..x.
-.mmm..kk.nnnnnnn.q..oooo..vvvv..y.wwwwwww.uu..xxx.
-.mmmmm...nnnnnnn.qqq..oo..vv..yyy.wwwwwww...xxxxx.
-.mmmmmmm..nnnnnn.qqqqq......yyyyy.wwwwww..xxxxxxx.
-.mmmmmmm.p..nnnn.qqqqqqq..yyyyyyy.wwww..z.xxxxxxx.
-.mmmmmmm.ppp..nn.qqqqqqq..yyyyyyy.ww..zzz.xxxxxxx.
-..mmmmmm.ppppp...qqqqqqq..yyyyyyy...zzzzz.xxxxxx..
-  ..mmmm.ppppppp..qqqqqq..yyyyyy..zzzzzzz.xxxx..  
-    ..mm.ppppppp.r..qqqq..yyyy..A.zzzzzzz.xx..    
-      ...ppppppp.rrr..qq..yy..AAA.zzzzzzz...      
-        ..pppppp.rrrrr......AAAAA.zzzzzz..        
-          ..pppp.rrrrrrr..AAAAAAA.zzzz..          
-            ..pp.rrrrrrr..AAAAAAA.zz..            
-              ...rrrrrrr..AAAAAAA...              
-                ..rrrrrr..AAAAAA..                
-                  ..rrrr..AAAA..                  
-                    ..rr..AA..                    
-                      ......                      
-                        ..                        
-""".splitlines()
-        for i in range(len(template)) :
-            print(f"\"{template[i]}  |  {template[len(template)-1-i]}\"")
-        return template
 
     def __mul__ ( self, other ) :
         if not isinstance(other, Cube) :
@@ -260,11 +209,12 @@ class Cube :
             pos = self.find_pos(piece, orientation)
             rotation = other.state[pos]
             new_state[piece] = self.rotate(orientation, rotation)
-
+            new_pos = self.find_pos(piece, new_state[piece])
+            
         return Cube(new_state)
 
     def __str__ ( self ) :
-        return f"{self.repr_orient_str()} | {self.repr_inv_orient_str()}\n{self.repr_isometric()}"
+        return f"{self.repr_orient_str()} | {self.repr_inv_orient_str()}"
 
 if __name__ == "__main__" :
     I  = Cube("oooo oooo oooo oooo oooo oooooo")
@@ -290,7 +240,6 @@ if __name__ == "__main__" :
     Cf = Cube("---- ---- ff-- ff-- ---- ffff--")
     Rf = Cube("-f-f -f-f ---f ---f -f-f -----f")
 
-    # R U R' U' | R' F R | R U' R' U' R U R' F'
     """
         R  Rf
         R' Ri
@@ -300,21 +249,11 @@ if __name__ == "__main__" :
         F' Gk
     """
 
-    print(Rf)
-    print(Rf * Wg)
-    print(Rf * Wg * Ri)
-    print(Rf * Wg * Ri * Wj)
+    print(f"Rf          : {Rf}")
+    print(f"     Wg     : {Wg}")
+    print(f"          Ri: {Ri}")
+    print(f"Rf * Wg     : {Rf * Wg}")
+    print(f"Rf      * Ri: {Rf * Ri}")
+    print(f"     Wg * Ri: {Wg * Ri}")
+    print(f"Rf * Wg * Ri: {Rf * Wg * Ri}")
     print()
-    sexy_move = Rf * Wg * Ri * Wj
-    print(sexy_move * Rf)
-    print(sexy_move * Rf * Wg)
-    print(sexy_move * Rf * Wg * Ri)
-    print(sexy_move * Rf * Wg * Ri * Wj)
-    print()
-    
-    print(sexy_move)
-    print(sexy_move * sexy_move)
-    print(sexy_move * sexy_move * sexy_move)
-    print(sexy_move * sexy_move * sexy_move * sexy_move)
-    print(sexy_move * sexy_move * sexy_move * sexy_move * sexy_move)
-    print(sexy_move * sexy_move * sexy_move * sexy_move * sexy_move * sexy_move)
