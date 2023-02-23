@@ -152,8 +152,8 @@ class Cube :
     def get_position_color ( self, piece, direction ) :
         pass
 
-    def distance ( self ) :
-        return sum([Cube.operation_table[orientation]["dist"] for orientation in self.state.values()])
+    def repr_distance ( self ) :
+        return "".join([str(Cube.operation_table[orientation]["dist"]) for orientation in self.state.values()])
 
     def repr_orient_str ( self ) :
         state = [Cube.operation_table[self.state[piece]]["sym"] for piece in Cube.standard_order]
@@ -187,10 +187,9 @@ class Cube :
         return Cube(new_state)
 
     def __str__ ( self ) :
-        return f"{self.repr_orient_str()} | {self.distance()} | {self.repr_inv_orient_str()}"
+        return f"{self.repr_orient_str()} | {self.repr_distance()} | {self.repr_inv_orient_str()}"
 
-if __name__ == "__main__" :
-    I  = Cube()
+class CubeBuilder :
 
     Wj = Cube("jjjj ---- jjjj ---- ---- j-----")
     Cj = Cube("---- ---- ---- ---- jjjj --jjjj")
@@ -213,31 +212,63 @@ if __name__ == "__main__" :
     Cf = Cube("---- ---- ff-- ff-- ---- ffff--")
     Rf = Cube("-f-f -f-f ---f ---f -f-f -----f")
 
+    algorithms = {
+        "OLL-9" : "R U R' U' R' F R2 U R' U' F'",
+        "OLL-15": "l' U' l L' U' L U l' U l",
+        "OLL-31": "R' U' F U R U' R' F' R",
+        "OLL-32": "L U F' U' L' U L F L'",
 
-    R = Rf
-    Rp = Ri
-    U = Wg
-    Up = Wj
-    F = Gh
-    Fp = Gk
+        "PLL-T": "R U R' U' R' F R2 U' R' U' R U R' F'",
+        "PLL-Y": "F R U' R' U' R U R' F' R U R' U' R' F R F'",
+        "PLL-UaM": "M2 U M U2 M' U M2",
+        "PLL-UaR": "R U' R U R U R U' R' U' R2",
+        "PLL-UbM": "M2 U' M U2 M' U' M2",
+        "PLL-UbR": "R2 U R U R' U' R' U' R' U R'",
+    }
 
-    sexy = R * U * Rp * Up
-    print(f"Cross 1: {F * sexy * Fp}")
-    print(f"Cross 2: {F * sexy * sexy * Fp}")
-    print(f"Cross 3: {F * sexy * sexy * sexy * Fp}")
+    def from_alg ( self, alg ) :
+        cube = Cube()
+        for step in alg.split(' ') :
+            if step == "" : continue
+            if   step == "R"  : cube *= CubeBuilder.Rf
+            elif step == "R'" : cube *= CubeBuilder.Ri
+            elif step == "R2" : cube *= CubeBuilder.Rf * CubeBuilder.Rf
+            elif step == "L"  : cube *= CubeBuilder.Oi
+            elif step == "L'" : cube *= CubeBuilder.Of
+            elif step == "l"  : cube *= CubeBuilder.Oi * CubeBuilder.Ci
+            elif step == "l'" : cube *= CubeBuilder.Of * CubeBuilder.Cf
+            elif step == "U"  : cube *= CubeBuilder.Wg
+            elif step == "U'" : cube *= CubeBuilder.Wj
+            elif step == "U2" : cube *= CubeBuilder.Wg * CubeBuilder.Wg
+            elif step == "F"  : cube *= CubeBuilder.Gh
+            elif step == "F'" : cube *= CubeBuilder.Gk
+            elif step == "M"  : cube *= CubeBuilder.Ci
+            elif step == "M'" : cube *= CubeBuilder.Cf
+            elif step == "M2" : cube *= CubeBuilder.Ci * CubeBuilder.Ci
+            elif step in CubeBuilder.algorithms :
+                cube *= self.from_alg(CubeBuilder.algorithms[step])
+            else :
+                raise Exception(f"Invalid step: {step}")
+        return cube
 
+if __name__ == "__main__" :
+    """
     print(f"OLL Sune: {R * U * Rp * U * R * U * U * Rp * U * U}")
 
-    print(f"Nb:")
-    cube = I
-    Nb = [Rp, U, R, Up, Rp, Fp, Up, F, R, U, Rp, F, Rp, Fp, R, Up, R]
-    for step in Nb :
-        cube *= step
-        print(f"  {cube}")
-    
-    print(f"T:")
-    cube = I
-    T = [R, U, Rp, Up, Rp, F, R, R, Up, Rp, Up, R, U, Rp, Fp]
-    for step in T :
-        cube *= step
-        print(f"  {cube}")
+    print(f"PLL-Nb: {Rp * U * R * Up * Rp * Fp * Up * F * R * U * Rp * F * Rp * Fp * R * Up * R}")
+    PLLT = R * U * Rp * Up * Rp * F * R * R * Up * Rp * Up * R * U * Rp * Fp
+    print(f"PLL-T : {PLLT}")
+    print(f"PLL-Ua: {M * M * U * M * U * U * Mp * U * M * M}")
+    print(f"PLL-Ua: {R * Up * R * U * R * U * R * Up * Rp * Up * R * R}")
+    print(f"PLL-Ub: {M * M * Up * M * U * U * Mp * Up * M * M}")
+    print(f"PLL-Ub: {R * R * U * R * U * Rp * Up * Rp * Up * Rp * U * Rp}")
+    print(f"PLL-Z : {Mp * U * M * M * U * M * M * U * Mp * U * U * M * M * Up}")
+    print(f"PLL-H : {M * M * U * M * M * U * U * M * M * U * M * M}")
+    print(f"PLL-H : {M * M * Up * M * M * U * U * M * M * Up * M * M}")
+    """
+
+    print(f"{Cube('-myi---- crgm-------- ------') * CubeBuilder().from_alg('OLL-32 PLL-T')}")
+    print(f"{Cube('tjmy---- c-x--------- ------') * CubeBuilder().from_alg('OLL-31 PLL-Y')}")
+    print(f"{Cube('v-ik---- sjgw-------- ------') * CubeBuilder().from_alg('OLL-9 U PLL-T U PLL-UaR U')}")
+    print(f"{Cube('pbtj---- cgvm-------- ------') * CubeBuilder().from_alg('OLL-15 U PLL-T U2')}")
+    # print(f"{Cube('????---- ????-------- ------') * CubeBuilder().from_alg('')}")
