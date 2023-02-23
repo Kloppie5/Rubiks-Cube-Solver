@@ -127,17 +127,96 @@ class Cube :
         "YR": {"sym": "z", "dist": 3, "dec": "kkj"},    # kkj
     }
 
-    def __init__ ( self, state = "-------- ------------ ------" ) :
+    algorithms = {
+        "U" : "c: gggg ---- gggg ---- ---- g-----", # Wg
+        "U'": "c: jjjj ---- jjjj ---- ---- j-----", # Wj
+        "U2": "c: mmmm ---- mmmm ---- ---- m-----", # Wm
+        "D" : "c: ---- jjjj ---- jjjj ---- -j----", # Yj
+        "D'": "c: ---- gggg ---- gggg ---- -g----", # Yg
+        "D2": "c: ---- mmmm ---- mmmm ---- -m----", # Ym
+        "R" : "c: -f-f -f-f ---f ---f -f-f -----f", # Rf
+        "R'": "c: -i-i -i-i ---i ---i -i-i -----i", # Ri
+        "R2": "c: -l-l -l-l ---l ---l -l-l -----l", # Rl
+        "L" : "c: i-i- i-i- --i- --i- i-i- ----i-", # Oi
+        "L'": "c: f-f- f-f- --f- --f- f-f- ----f-", # Of
+        "L2": "c: l-l- l-l- --l- --l- l-l- ----l-", # Ol
+        "F" : "c: hh-- hh-- h--- h--- hh-- --h---", # Gh
+        "F'": "c: kk-- kk-- k--- k--- kk-- --k---", # Gk
+        "F2": "c: nn-- nn-- n--- n--- nn-- --n---", # Gn
+        "B" : "c: --kk --kk -k-- -k-- --kk ---k--", # Bk
+        "B'": "c: --hh --hh -h-- -h-- --hh ---h--", # Bh
+        "B2": "c: --nn --nn -n-- -n-- --nn ---n--", # Bn
+
+        "r" : "c: -f-f -f-f ff-f ff-f -f-f ffff-f", # R M'
+        "r'": "c: -i-i -i-i ii-i ii-i -i-i iiiii-", # R' M
+        "r2": "c: -l-l -l-l ll-l ll-l -l-l lllll-", # R2 M2
+        "l" : "c: i-i- i-i- iii- iii- i-i- iiiii-", # L M
+        "l'": "c: f-f- f-f- fff- fff- f-f- fffff-", # L' M'
+        "l2": "c: l-l- l-l- lll- lll- l-l- lllll-", # L2 M2
+
+        "x" : "c: ffff ffff ffff ffff ffff ffffff", # Ff
+        "x'": "c: iiii iiii iiii iiii iiii iiiiii", # Fi
+        "y" : "c: gggg gggg gggg gggg gggg gggggg", # Fg
+        "y'": "c: jjjj jjjj jjjj jjjj jjjj jjjjjj", # Fj
+        "z" : "c: hhhh hhhh hhhh hhhh hhhh hhhhhh", # Fh
+        "z'": "c: kkkk kkkk kkkk kkkk kkkk kkkkkk", # Fk
+
+        "M" : "c: ---- ---- ii-- ii-- ---- iiii--", # Ci
+        "M'": "c: ---- ---- ff-- ff-- ---- ffff--", # Cf
+        "M2": "c: ---- ---- ll-- ll-- ---- llll--", # Cl
+        "E" : "c: ---- ---- ---- ---- jjjj --jjjj", # Cj
+        "E'": "c: ---- ---- ---- ---- gggg --gggg", # Cg
+        "S" : "c: ---- ---- --hh --hh ---- hh--hh", # Ch
+        "S'": "c: ---- ---- --kk --kk ---- kk--kk", # Ck
+
+        "OLL-3"  : "a: r' R2 U R' U r U2 r' U M'",
+        "OLL-4"  : "a: M U' r U2 r' U' R U' R' M'",
+        "OLL-8"  : "a: l' U' L U' L' U2 l",
+        "OLL-9"  : "a: R U R' U' R' F R2 U R' U' F'",
+        "OLL-12" : "a: M' R' U' R U' R' U2 R U' R r'",
+        "OLL-15" : "a: l' U' l L' U' L U l' U l",
+        "OLL-16" : "a: r U r' R U R' U' r U' r'",
+        "OLL-17" : "a: F R' F' R2 r' U R U' R' U' M'",
+        "OLL-31" : "a: R' U' F U R U' R' F' R",
+        "OLL-32" : "a: L U F' U' L' U L F L'",
+        "OLL-44" : "a: F U R U' R' F'",
+        "OLL-53" : "a: l' U2 L U L' U' L U L' U l",
+
+        "PLL-Aa" : "a: x L2 D2 L' U' L D2 L' U L'",
+        "PLL-F"  : "a: R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R",
+        "PLL-Ga" : "a: R2 U R' U R' U' R U' R2 U' D R' U R D'",
+        "PLL-Gb" : "a: R' U' R U D' R2 U R' U R U' R U' R2 D",
+        "PLL-Jb" : "a: R U R' F' R U R' U' R' F R2 U' R'",
+        "PLL-T"  : "a: R U R' U' R' F R2 U' R' U' R U R' F'",
+        "PLL-UaM": "a: M2 U M U2 M' U M2",
+        "PLL-UaR": "a: R U' R U R U R U' R' U' R2",
+        "PLL-UbM": "a: M2 U' M U2 M' U' M2",
+        "PLL-UbR": "a: R2 U R U R' U' R' U' R' U R'",
+        "PLL-V"  : "a: R' U R' U' y R' F' R2 U' R' U R' F R F",
+        "PLL-Y"  : "a: F R U' R' U' R U R' F' R U R' U' R' F R F'",
+        "PLL-Z"  : "a: M' U M2 U M2 U M' U2 M2",
+    }
+
+    def __init__ ( self, name = "", state = "-------- ------------ ------" ) :
+        self.name = name
+        self.state = {}
+        self.hist = []
         if isinstance(state, str) :
             state = state.replace(" ", "")
-            self.state = {}
             for i in range(len(state)) :
                 for k, v in Cube.operation_table.items() :
                     if v["sym"] == state[i] :
                         self.state[Cube.standard_order[i]] = k
                         break
+                else :
+                    raise Exception(f"Invalid state: {state}")
         elif isinstance(state, dict) :
             self.state = state
+        else :
+            raise Exception(f"Invalid state: {state}")
+
+    def dump ( self ) :
+        print(f"{self.repr_orient_str()} | {self.name} | {self.hist}")
 
     def find_pos ( self, piece, orientation ) :
         for step in Cube.operation_table[orientation]["dec"] :
@@ -148,9 +227,6 @@ class Cube :
         for step in Cube.operation_table[rotation]["dec"] :
             orientation = Cube.rotation_table[orientation]["ijk".index(step)]
         return orientation
-
-    def get_position_color ( self, piece, direction ) :
-        pass
 
     def repr_distance ( self ) :
         return "".join([str(Cube.operation_table[orientation]["dist"]) for orientation in self.state.values()])
@@ -175,100 +251,61 @@ class Cube :
         return state
 
     def __mul__ ( self, other ) :
-        if not isinstance(other, Cube) :
-            raise Exception("Can only multiply a cube by another cube")
-        new_state = {}
-        for piece, orientation in self.state.items() :
-            pos = self.find_pos(piece, orientation)
-            rotation = other.state[pos]
-            new_state[piece] = self.rotate(orientation, rotation)
-            new_pos = self.find_pos(piece, new_state[piece])
-            
-        return Cube(new_state)
+        if isinstance(other, Cube) :
+            new_state = {}
+            for piece, orientation in self.state.items() :
+                pos = self.find_pos(piece, orientation)
+                rotation = other.state[pos]
+                new_state[piece] = self.rotate(orientation, rotation)
+                
+            solution = Cube(self.name, new_state)
+            solution.hist = self.hist + other.hist
+            return solution
+        elif isinstance(other, str) :
+            if other.startswith("a: ") :
+                other = other[3:]
+                other_cube = Cube()
+                for step in other.split(' ') :
+                    if step in Cube.algorithms :
+                        other_cube *= Cube.algorithms[step]
+                    else :
+                        raise Exception(f"Invalid step: {step}")
+                other_cube.hist = other.split(' ')
+                return self * other_cube
+
+            elif other.startswith("c: ") :
+                other = other[3:]
+                return self * Cube("", other)
+            else :
+                raise Exception(f"Invalid algorithm: {other}")
+        else :
+            raise Exception(f"Invalid operation: {self} * {other}")
 
     def __str__ ( self ) :
         return f"{self.repr_orient_str()} | {self.repr_distance()} | {self.repr_inv_orient_str()}"
 
-class CubeBuilder :
-
-    Wj = Cube("jjjj ---- jjjj ---- ---- j-----")
-    Cj = Cube("---- ---- ---- ---- jjjj --jjjj")
-    Yj = Cube("---- jjjj ---- jjjj ---- -j----")
-    Wg = Cube("gggg ---- gggg ---- ---- g-----")
-    Cg = Cube("---- ---- ---- ---- gggg --gggg")
-    Yg = Cube("---- gggg ---- gggg ---- -g----")
-
-    Gk = Cube("kk-- kk-- k--- k--- kk-- --k---")
-    Ck = Cube("---- ---- --kk --kk ---- kk--kk")
-    Bk = Cube("--kk --kk -k-- -k-- --kk ---k--")
-    Gh = Cube("hh-- hh-- h--- h--- hh-- --h---")
-    Ch = Cube("---- ---- --hh --hh ---- hh--hh")
-    Bh = Cube("--hh --hh -h-- -h-- --hh ---h--")
-
-    Oi = Cube("i-i- i-i- --i- --i- i-i- ----i-")
-    Ci = Cube("---- ---- ii-- ii-- ---- iiii--")
-    Ri = Cube("-i-i -i-i ---i ---i -i-i -----i")
-    Of = Cube("f-f- f-f- --f- --f- f-f- ----f-")
-    Cf = Cube("---- ---- ff-- ff-- ---- ffff--")
-    Rf = Cube("-f-f -f-f ---f ---f -f-f -----f")
-
-    algorithms = {
-        "OLL-9" : "R U R' U' R' F R2 U R' U' F'",
-        "OLL-15": "l' U' l L' U' L U l' U l",
-        "OLL-31": "R' U' F U R U' R' F' R",
-        "OLL-32": "L U F' U' L' U L F L'",
-
-        "PLL-T": "R U R' U' R' F R2 U' R' U' R U R' F'",
-        "PLL-Y": "F R U' R' U' R U R' F' R U R' U' R' F R F'",
-        "PLL-UaM": "M2 U M U2 M' U M2",
-        "PLL-UaR": "R U' R U R U R U' R' U' R2",
-        "PLL-UbM": "M2 U' M U2 M' U' M2",
-        "PLL-UbR": "R2 U R U R' U' R' U' R' U R'",
-    }
-
-    def from_alg ( self, alg ) :
-        cube = Cube()
-        for step in alg.split(' ') :
-            if step == "" : continue
-            if   step == "R"  : cube *= CubeBuilder.Rf
-            elif step == "R'" : cube *= CubeBuilder.Ri
-            elif step == "R2" : cube *= CubeBuilder.Rf * CubeBuilder.Rf
-            elif step == "L"  : cube *= CubeBuilder.Oi
-            elif step == "L'" : cube *= CubeBuilder.Of
-            elif step == "l"  : cube *= CubeBuilder.Oi * CubeBuilder.Ci
-            elif step == "l'" : cube *= CubeBuilder.Of * CubeBuilder.Cf
-            elif step == "U"  : cube *= CubeBuilder.Wg
-            elif step == "U'" : cube *= CubeBuilder.Wj
-            elif step == "U2" : cube *= CubeBuilder.Wg * CubeBuilder.Wg
-            elif step == "F"  : cube *= CubeBuilder.Gh
-            elif step == "F'" : cube *= CubeBuilder.Gk
-            elif step == "M"  : cube *= CubeBuilder.Ci
-            elif step == "M'" : cube *= CubeBuilder.Cf
-            elif step == "M2" : cube *= CubeBuilder.Ci * CubeBuilder.Ci
-            elif step in CubeBuilder.algorithms :
-                cube *= self.from_alg(CubeBuilder.algorithms[step])
-            else :
-                raise Exception(f"Invalid step: {step}")
-        return cube
-
 if __name__ == "__main__" :
     """
-    print(f"OLL Sune: {R * U * Rp * U * R * U * U * Rp * U * U}")
-
-    print(f"PLL-Nb: {Rp * U * R * Up * Rp * Fp * Up * F * R * U * Rp * F * Rp * Fp * R * Up * R}")
-    PLLT = R * U * Rp * Up * Rp * F * R * R * Up * Rp * Up * R * U * Rp * Fp
-    print(f"PLL-T : {PLLT}")
-    print(f"PLL-Ua: {M * M * U * M * U * U * Mp * U * M * M}")
-    print(f"PLL-Ua: {R * Up * R * U * R * U * R * Up * Rp * Up * R * R}")
-    print(f"PLL-Ub: {M * M * Up * M * U * U * Mp * Up * M * M}")
-    print(f"PLL-Ub: {R * R * U * R * U * Rp * Up * Rp * Up * Rp * U * Rp}")
-    print(f"PLL-Z : {Mp * U * M * M * U * M * M * U * Mp * U * U * M * M * Up}")
-    print(f"PLL-H : {M * M * U * M * M * U * U * M * M * U * M * M}")
-    print(f"PLL-H : {M * M * Up * M * M * U * U * M * M * Up * M * M}")
+         . v   . .   v .   . .  |   f     y     v     .
+        .. .s .m .. .- .. kj .. |   m     -     .     .
+                                | .. .. .. .r x- m. k. .b 
+        .. .. .g -s .j m. .. .b |   .     .     .     .
+         . .   c .   i .   w i  |   c     i     .     .
     """
 
-    print(f"{Cube('-myi---- crgm-------- ------') * CubeBuilder().from_alg('OLL-32 PLL-T')}")
-    print(f"{Cube('tjmy---- c-x--------- ------') * CubeBuilder().from_alg('OLL-31 PLL-Y')}")
-    print(f"{Cube('v-ik---- sjgw-------- ------') * CubeBuilder().from_alg('OLL-9 U PLL-T U PLL-UaR U')}")
-    print(f"{Cube('pbtj---- cgvm-------- ------') * CubeBuilder().from_alg('OLL-15 U PLL-T U2')}")
-    # print(f"{Cube('????---- ????-------- ------') * CubeBuilder().from_alg('')}")
+    (Cube("init", "-myi---- crgm-------- ------") * "a: OLL-32 PLL-T").dump()
+    (Cube("init", "tjmy---- c-x--------- ------") * "a: OLL-31 PLL-Y").dump()
+    (Cube("init", "v-ik---- sjgw-------- ------") * "a: OLL-9 U PLL-T U PLL-UaR U").dump()
+    (Cube("init", "pbtj---- cgvm-------- ------") * "a: OLL-15 U PLL-T U2").dump()
+    (Cube("init", "twvu---- cggk-------- ------") * "a: OLL-53 U PLL-Z U2").dump()
+    (Cube("init", "sgrj---- g-tb-------- ------") * "a: OLL-44 U2 PLL-T U PLL-Z").dump()
+    (Cube("init", "vpig---- cqg--------- ------") * "a: OLL-8 U PLL-T U' PLL-UbR").dump()
+    (Cube("init", "hpgw---- fjmw-------- ------") * "a: OLL-16 U2 PLL-Jb U").dump()
+    (Cube("init", "sgvi---- cyxb-------- ------") * "a: OLL-3 U2 PLL-Aa x' U").dump()
+    (Cube("init", "s-ij---- crvk-------- ------") * "a: OLL-17 PLL-UbR U").dump()
+    (Cube("init", "vcmk---- fixb-------- ------") * "a: OLL-4 U PLL-F").dump()
+    (Cube("init", "smjb---- mi-b-------- ------") * "a: OLL-44 U PLL-Ga U").dump()
+    (Cube("init", "vs-w---- c-mk-------- ------") * "a: OLL-12 PLL-V y' U'").dump()
+    # print(Cube("????---- ????-------- ------") * "a: ")
+
+# A3a1) The competitor is allotted a maximum of 15 seconds to inspect the puzzle and start the solve.
