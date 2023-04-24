@@ -106,7 +106,80 @@
 
     <table style="border-collapse:collapse" cellspacing="0" cellpadding="0" id="last-layer-permutations"></table>
     <script>
+      const marks = {
+        "C1234E1234": "Identity",
+        "C2314E1234": "Aa",
+        "C3241E1234": "Ab",
+        "C1432E4231": "F",
+        "C1432E4123": "Ga",
+        "C1432E2341": "Gb",
+        "C1432E3421": "Gc",
+        "C1432E4312": "Gd",
+        "C1432E3214": "Ja",
+        "C1432E1243": "Jb",
+        "C1432E2134": "Ra",
+        "C1432E1432": "Rb",
+        "C1432E1324": "T",
+        "C3412E1234": "E",
+        "C1324E1324": "Na",
+        "C4231E1324": "Nb",
+        "C4231E3214": "V",
+        "C4231E2134": "Y",
+        "C1234E4321": "Y",
+        "C1234E1423": "Ua",
+        "C1234E1342": "Ub",
+        "C1234E3412": "Z",
+      }
+      const cuperm = {"1":"2","2":"4","3":"1","4":"3"};
+      const euperm = {"1":"3","2":"1","3":"4","4":"2"};
+      var colormap = {};
+
+      function ukey ( key ) {
+        return "C" + cuperm[key[1]] + cuperm[key[2]] + cuperm[key[3]] + cuperm[key[4]] + "E" + euperm[key[6]] + euperm[key[7]] + euperm[key[8]] + euperm[key[9]];
+      }
+      function skey ( key ) {
+        return "C" + cuperm[key[3]] + cuperm[key[1]] + cuperm[key[4]] + cuperm[key[2]] + "E" + euperm[key[7]] + euperm[key[9]] + euperm[key[6]] + euperm[key[8]];
+      }
+
       $(function() {
+        $.each(marks, function(key, value) {
+          u1key = ukey(key);
+          u2key = ukey(u1key);
+          u3key = ukey(u2key);
+
+          s1key = skey(key);
+          s1u1key = ukey(s1key);
+          s1u2key = ukey(s1u1key);
+          s1u3key = ukey(s1u2key);
+
+          s2key = skey(s1key);
+          s2u1key = ukey(s2key);
+          s2u2key = ukey(s2u1key);
+          s2u3key = ukey(s2u2key);
+
+          s3key = skey(s2key);
+          s3u1key = ukey(s3key);
+          s3u2key = ukey(s3u1key);
+          s3u3key = ukey(s3u2key);
+
+          colormap[s3u3key] = "orange";
+          colormap[s3u2key] = "orange";
+          colormap[s3u1key] = "orange";
+          colormap[s2u3key] = "orange";
+          colormap[s2u2key] = "orange";
+          colormap[s2u1key] = "orange";
+          colormap[s1u3key] = "orange";
+          colormap[s1u2key] = "orange";
+          colormap[s1u1key] = "orange";
+          colormap[s3key] = "blue";
+          colormap[s2key] = "blue";
+          colormap[s1key] = "blue";
+          colormap[u1key] = "yellow";
+          colormap[u2key] = "yellow";
+          colormap[u3key] = "yellow";
+          colormap[key] = "green";
+        });
+
         var table = $("#last-layer-permutations");
         $.each(["S", "D", "E1234", "E2134", "E3214", "E1432", "E1243", "E4231", "D", "E3142", "E1342", "E4132", "E3241", "E3124", "E2143", "D", "E4321", "E3421", "E2341", "E4123", "E4312", "E1324", "D", "E2413", "E4213", "E1423", "E2314", "E2431", "E3412"], function(eindex, evalue) {
           var row = $("<tr></tr>");
@@ -121,6 +194,9 @@
             }
             var td = $("<td title='" + cvalue + evalue + "' id='" + cvalue + evalue + "'></td>");
             var svg = $("<svg width='100%' height='100%' viewBox='0 0 100 100'></svg>");
+            if ( colormap[cvalue + evalue] )
+              svg.append($("<rect x='0' y='0' width='100' height='100' fill='" + colormap[cvalue + evalue] + "' />"));
+
             svg.append($("<use xlink:href='#layer' />"));
             for ( var i = 1 ; i < cvalue.length ; i++ )
               if ( i != cvalue[i] )
