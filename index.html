@@ -5,34 +5,6 @@
   </head>
   <body>
     <svg style="display:none">
-      <symbol id="layer">
-        <rect x="10" y="0" width="30" height="10" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="40" y="0" width="30" height="10" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="70" y="0" width="30" height="10" fill="none" stroke="black" stroke-width="1"/>
-
-        <rect x="0" y="10" width="10" height="30" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="10" y="10" width="30" height="30" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="40" y="10" width="30" height="30" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="70" y="10" width="30" height="30" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="100" y="10" width="10" height="30" fill="none" stroke="black" stroke-width="1"/>
-
-        <rect x="0" y="40" width="10" height="30" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="10" y="40" width="30" height="30" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="40" y="40" width="30" height="30" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="70" y="40" width="30" height="30" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="100" y="40" width="10" height="30" fill="none" stroke="black" stroke-width="1"/>
-
-        <rect x="0" y="70" width="10" height="30" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="10" y="70" width="30" height="30" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="40" y="70" width="30" height="30" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="70" y="70" width="30" height="30" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="100" y="70" width="10" height="30" fill="none" stroke="black" stroke-width="1"/>
-
-        <rect x="10" y="100" width="30" height="10" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="40" y="100" width="30" height="10" fill="none" stroke="black" stroke-width="1"/>
-        <rect x="70" y="100" width="30" height="10" fill="none" stroke="black" stroke-width="1"/>
-      </symbol>
-
       <symbol id="impossible">
         <path d="M 20 20 L 80 80 m 80 20 L 20 80" stroke="red" stroke-width="4" fill="none" />
       </symbol>
@@ -171,75 +143,51 @@
         return "C" + cuperm[key[3]] + cuperm[key[1]] + cuperm[key[4]] + cuperm[key[2]] + "E" + euperm[key[7]] + euperm[key[9]] + euperm[key[6]] + euperm[key[8]];
       }
 
+      var colormap = [
+        "white",
+        "green",
+        "red",
+        "yellow",
+        "blue",
+        "orange",
+      ];
+
       function initializeAllSVGs ( ) {
         $(".cubeface").each(function() {
           var info = $(this).attr("class").split(/\s+/)[1].split("-");
 
-          $(this).append($("<use xlink:href='#layer' />"));
+          var layer = $("<g></g>");
+
+          var cindex = info.indexOf("C") + 1;
+          var colors = "000000000000000000000";
+          console.log(colors);
+          if ( cindex > 0 )
+            colors = info[cindex];
+          colors = colors.split("");
+
+          var pos = [
+                             [10,   0, 30, 10], [40,   0, 30, 10], [70,   0, 30, 10],
+            [0, 10, 10, 30], [10,  10, 30, 30], [40,  10, 30, 30], [70,  10, 30, 30], [100, 10, 10, 30],
+            [0, 40, 10, 30], [10,  40, 30, 30], [40,  40, 30, 30], [70,  40, 30, 30], [100, 40, 10, 30],
+            [0, 70, 10, 30], [10,  70, 30, 30], [40,  70, 30, 30], [70,  70, 30, 30], [100, 70, 10, 30],
+                             [10, 100, 30, 10], [40, 100, 30, 10], [70, 100, 30, 10]
+          ];
+          for ( var i = 0 ; i < pos.length ; ++i ) {
+            layer.append($("<rect x='" + pos[i][0] + "' y='" + pos[i][1] + "' width='" + pos[i][2] + "' height='" + pos[i][3] + "' fill='" + colormap[colors[i]] + "' stroke='black' stroke-width='1' />"));
+          }
+          $(this).append(layer);
 
           var pindex = info.indexOf("P") + 1;
           if ( pindex > 0 ) {
-            var perm = info[pindex].slice(0,4)+"5"+info[pindex].slice(4,8);
+            var perm = info[pindex];
             for ( var i = 0 ; i < perm.length ; ++i )
               if ( i+1 != perm[i] )
                 $(this).append($("<use xlink:href='#mov" + (i+1) + ""+ perm[i] + "' />"));
           }
         });
-        /*
-        if ( colormap[cvalue + evalue] )
-              svg.append($("<rect x='0' y='0' width='100' height='100' fill='" + colormap[cvalue + evalue] + "' />"));
-
-            svg.append($("<use xlink:href='#layer' />"));
-            for ( var i = 1 ; i < cvalue.length ; i++ )
-              if ( i != cvalue[i] )
-                svg.append($("<use xlink:href='#C" + i + ""+ cvalue[i] + "' />"));
-            for ( var i = 1 ; i < evalue.length ; i++ )
-              if ( i != evalue[i] )
-                svg.append($("<use xlink:href='#E" + i + "" + evalue[i] + "' />"));
-                */
       }
 
       $(function() {
-        /*
-        $.each(marks, function(key, value) {
-          u1key = ukey(key);
-          u2key = ukey(u1key);
-          u3key = ukey(u2key);
-
-          s1key = skey(key);
-          s1u1key = ukey(s1key);
-          s1u2key = ukey(s1u1key);
-          s1u3key = ukey(s1u2key);
-
-          s2key = skey(s1key);
-          s2u1key = ukey(s2key);
-          s2u2key = ukey(s2u1key);
-          s2u3key = ukey(s2u2key);
-
-          s3key = skey(s2key);
-          s3u1key = ukey(s3key);
-          s3u2key = ukey(s3u1key);
-          s3u3key = ukey(s3u2key);
-
-          colormap[s3u3key] = "orange";
-          colormap[s3u2key] = "orange";
-          colormap[s3u1key] = "orange";
-          colormap[s2u3key] = "orange";
-          colormap[s2u2key] = "orange";
-          colormap[s2u1key] = "orange";
-          colormap[s1u3key] = "orange";
-          colormap[s1u2key] = "orange";
-          colormap[s1u1key] = "orange";
-          colormap[u1key] = "yellow";
-          colormap[u2key] = "yellow";
-          colormap[u3key] = "yellow";
-          colormap[s3key] = "blue";
-          colormap[s2key] = "blue";
-          colormap[s1key] = "blue";
-          colormap[key] = "green";
-        });
-        */
-
         var table = $("#last-layer-permutations");
         $.each(["2468", "D", "2468", "4268", "6428", "2864", "2486", "8462", "D", "6284", "2684", "8264", "6482", "6248", "4286", "D", "8642", "6842", "4682", "8246", "8624", "2648", "D", "4826", "8426", "2846", "4628", "4862", "6824"], function(eindex, evalue) {
           var row = $("<tr></tr>");
@@ -252,7 +200,7 @@
               row.append($("<td style='border-bottom: 10px solid black'></td>"));
               return;
             }
-            var permut = cvalue.split("").map((k, i) => k + evalue[i]).join('');
+            var permut = cvalue[0] + evalue[0] + cvalue[1] + evalue[1] + "5" + evalue[2] + cvalue[2] + evalue[3] + cvalue[3];
             var td = $("<td id='PLL-" + permut + "'></td>");
             if ( marks[permut] )
               td.attr("title", marks[permut]);
