@@ -2,6 +2,11 @@
 <html>
   <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <style>
+      .leveled {
+        display: none;
+      }
+    </style>
   </head>
   <body>
     <svg style="display:none">
@@ -93,23 +98,116 @@
       </symbol>
     </svg>
 
-    <div id="intial-method">
+    <div id="level-slider-container">
+      <input type="range" min="0" max="4" value="0" class="slider" id="level-slider">
+      <div id="level-slider-label">Level 0</div>
+      <script>
+        var slider = document.getElementById("level-slider");
+        var output = document.getElementById("level-slider-label");
+        output.innerHTML = "Level " + slider.value;
+        slider.oninput = function() {
+          setLevel(this.value)
+        }
+        function setLevel ( level ) {
+          output.innerHTML = "Level " + level;
+          $(".leveled").each(function() {
+            var info = $(this).attr("class").split(/\s+/)[1].split("-");
+            var min = parseInt(info[1]);
+            var max = parseInt(info[2]);
+            console.log(min, max);
+
+            if ( min <= level && level <= max ) {
+              $(this).show();
+            } else {
+              $(this).hide();
+            }
+          });
+        }
+        $(document).ready(function() {
+          setLevel(0);
+        });
+      </script>
+    </div>
+    <div id="method">
       Initial method;
       <ul>
         <li>Cross by intuition</li>
         <li>First layer corners</li>
         <li>Second layer edges</li>
-        <li>Last layer edge orientation</li>
-        <li>Last layer corner orientation</li>
-        <li>Last layer corner permutation</li>
+        <li>Simple Edge OLL</li>
+        <li>Simple Corner OLL</li>
+        <li>Simple Corner PLL</li>
         <li>Last layer edge permutation</li>
       </ul>
-      <div id="last-layer-edge-orientation-initial">
-        F RUR'U' F'
+      <div id="cross-intuition">
+        Solving the cross by intuition<br />
+        It is usually advised to solve the cross on the top of the cube and rotate the cube afterwards, as well as focus on solving a specific color at all times, like white.<br />
+        Personally, I'd advise to either pick a color at random or already try to look for which color has the most pieces close together.
+      </div>
+      <div id="edge-oll-0" class="leveled level-0-0">
+        Simple Edge OLL
+        F RUR'U' F'<br />
+        Flips 2 to 8, flips 8 to 6, and moves 6 to 2<br />
+        <svg class='cubeface P-183452769-C-666666666676666666666' width='110px' height='110px' viewBox='0 0 110 110'></svg><br />
+
+        This gives 4 different cycles, two of which are relevant;<br />
+
+        <svg class='cubeface C-606666660676066666606' width='110px' height='110px' viewBox='0 0 110 110'></svg>
+        <svg class='cubeface C-606666660670666066666' width='110px' height='110px' viewBox='0 0 110 110'></svg>
+        <svg class='cubeface C-666660660676066066666' width='110px' height='110px' viewBox='0 0 110 110'></svg><br />
+
+        <svg class='cubeface C-606666666076066066666' width='110px' height='110px' viewBox='0 0 110 110'></svg><br />
+
+        <svg class='cubeface C-666660660670666666606' width='110px' height='110px' viewBox='0 0 110 110'></svg><br />
+
+        <svg class='cubeface C-666660666076066666606' width='110px' height='110px' viewBox='0 0 110 110'></svg>
+        <svg class='cubeface C-606666666070666666606' width='110px' height='110px' viewBox='0 0 110 110'></svg>
+
+        <svg class='cubeface C-666660666070666066666' width='110px' height='110px' viewBox='0 0 110 110'></svg>
+      </div>
+      <div id="edge-oll-1" class="leveled level-1-1">
+        2-Look OLL, Edges<br />
+        F RUR'U' F' flips 2 to 8, flips 8 to 6, and moves 6 to 2<br />
+        <svg class='cubeface P-183452769-C-666666666676666666666' width='110px' height='110px' viewBox='0 0 110 110'></svg><br />
+        f RUR'U' f' flips 2 to 8, moves 8 to 4, and flips 4 to 2<br />
+        <svg class='cubeface P-183256749-C-666666666676666666666' width='110px' height='110px' viewBox='0 0 110 110'></svg><br />
+        These can be combined to solve all the possible edge orientations;<br />
+        (F RUR'U' F') (f RUR'U' f') solves the dot case<br />
+        <svg class='cubeface P-143258769-C-606666660676066666606' width='110px' height='110px' viewBox='0 0 110 110'></svg>
+        (F RUR'U' F') solves the I case<br />
+        <svg class='cubeface P-183452769-C-606666666070666666606' width='110px' height='110px' viewBox='0 0 110 110'></svg>
+        (f RUR'U' f') solves the L case<br />
+        <svg class='cubeface P-183256749-C-606666660670666066666' width='110px' height='110px' viewBox='0 0 110 110'></svg>
+      </div>
+      <div id="corner-oll-0" class="leveled level-0-0">
+        Simple Corner OLL<br />
+        RUR'URU2R'U2<br />
+        Rotates 1, 3, and 9 clockwise<br />
+
+        <svg class='cubeface C-660067666777660760666' width='110px' height='110px' viewBox='0 0 110 110'></svg>
+        <svg class='cubeface C-066667606777660766660' width='110px' height='110px' viewBox='0 0 110 110'></svg>
+        <svg class='cubeface C-666607066777660706666' width='110px' height='110px' viewBox='0 0 110 110'></svg><br />
+
+        By looking at the different corners and seeing how many rotations they need, modulo 3, we can rotate all the corners into the correct orientation.
+      </div>
+      <div id="corner-pll-simple" class="leveled level-0-0">
+        Simple Corner PLL<br />
+        RUR'U' R'F R2U'R'U' RUR'F'<br />
+        Swaps 3 and 9, and 4 and 6<br />
+        <svg class='cubeface P-129654783-C-666677766777667776666' width='110px' height='110px' viewBox='0 0 110 110'></svg>
+        This can be used several times to swap the corners around until they are in the correct position relative to each other.
+      </div>
+      <div id="edge-pll-simple" class="leveled level-0-0">
+        Simple Edge PLL<br />
+        M2 U' M' U'2 M U' M2<br />
+        Rotates 4, 6, and 8 clockwise<br />
+        <svg class='cubeface P-123658749-C-777777776777677777767' width='110px' height='110px' viewBox='0 0 110 110'></svg>
       </div>
     </div>
 
+    <!--
     <table style="border-collapse:collapse" cellspacing="0" cellpadding="0" id="last-layer-permutations"></table>
+    -->
     <script>
       const marks = {
         "P-13792468": "I",
@@ -136,12 +234,14 @@
         "P-13794286": "Adapted Z; M'U' M'2U' M'2U M'U' U'M'2U",
       }
 
+      /*
       function ukey ( key ) {
         return "C" + cuperm[key[1]] + cuperm[key[2]] + cuperm[key[3]] + cuperm[key[4]] + "E" + euperm[key[6]] + euperm[key[7]] + euperm[key[8]] + euperm[key[9]];
       }
       function skey ( key ) {
         return "C" + cuperm[key[3]] + cuperm[key[1]] + cuperm[key[4]] + cuperm[key[2]] + "E" + euperm[key[7]] + euperm[key[9]] + euperm[key[6]] + euperm[key[8]];
       }
+      */
 
       var colormap = [
         "white",
@@ -150,6 +250,8 @@
         "yellow",
         "blue",
         "orange",
+        "grey",
+        "lightgrey",
       ];
 
       function initializeAllSVGs ( ) {
@@ -184,10 +286,13 @@
               if ( i+1 != perm[i] )
                 $(this).append($("<use xlink:href='#mov" + (i+1) + ""+ perm[i] + "' />"));
           }
+
+          $(this).html($(this).html());
         });
       }
 
       $(function() {
+        /*
         var table = $("#last-layer-permutations");
         $.each(["2468", "D", "2468", "4268", "6428", "2864", "2486", "8462", "D", "6284", "2684", "8264", "6482", "6248", "4286", "D", "8642", "6842", "4682", "8246", "8624", "2648", "D", "4826", "8426", "2846", "4628", "4862", "6824"], function(eindex, evalue) {
           var row = $("<tr></tr>");
@@ -210,10 +315,8 @@
           });
           table.append(row);
         });
-
+        */
         initializeAllSVGs();
-        // refresh table
-        table.html(table.html());
       });
     </script>
   </body>
