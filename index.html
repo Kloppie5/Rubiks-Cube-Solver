@@ -129,20 +129,39 @@
       </script>
     </div>
     <div id="method">
-      Initial method;
       <ul>
-        <li>Cross by intuition</li>
-        <li>First layer corners</li>
-        <li>Second layer edges</li>
-        <li>Simple Edge OLL</li>
-        <li>Simple Corner OLL</li>
-        <li>Simple Corner PLL</li>
-        <li>Last layer edge permutation</li>
+
+        <li class="leveled level-0-2">Cross by intuition</li>
+
+        <li class="leveled level-0-1">First layer corners</li>
+        <li class="leveled level-0-1">Second layer edges</li>
+        <li class="leveled level-2-2">F2L</li>
+
+        <li class="leveled level-0-0">Simple Edge OLL</li>
+        <li class="leveled level-1-2">2-Look Edge OLL</li>
+        <li class="leveled level-0-0">Simple Corner OLL</li>
+        <li class="leveled level-1-2">2-Look Corner OLL</li>
+
+        <li class="leveled level-0-0">Simple Corner PLL</li>
+        <li class="leveled level-1-2">2-Look Corner PLL</li>
+        <li class="leveled level-0-0">Simple Edge PLL</li>
+        <li class="leveled level-1-2">2-Look Edge PLL</li>
       </ul>
-      <div id="cross-intuition">
+      <div id="cross-intuition" class="leveled level-0-2">
         Solving the cross by intuition<br />
         It is usually advised to solve the cross on the top of the cube and rotate the cube afterwards, as well as focus on solving a specific color at all times, like white.<br />
         Personally, I'd advise to either pick a color at random or already try to look for which color has the most pieces close together.
+      </div>
+      <div id="first-layer-corners" class="leveled level-0-1">
+        First layer corners<br />
+        Something about URU'R' and U'L'UL<br />
+      </div>
+      <div id="second-layer-edges" class="leveled level-0-1">
+        Second layer edges<br />
+        Something about U'L'UL UyRU'R' and URU'R'U' U'y'L'UL<br />
+      </div>
+      <div id="f2l" class="leveled level-2-2">
+        F2L<br />
       </div>
       <div id="edge-oll-0" class="leveled level-0-0">
         Simple Edge OLL
@@ -165,19 +184,16 @@
 
         <svg class='cubeface C-666660666070666066666' width='110px' height='110px' viewBox='0 0 110 110'></svg>
       </div>
-      <div id="edge-oll-1" class="leveled level-1-1">
+      <div id="edge-oll-1-2" class="leveled level-1-2">
         2-Look OLL, Edges<br />
         F RUR'U' F' flips 2 to 8, flips 8 to 6, and moves 6 to 2<br />
         <svg class='cubeface P-183452769-C-666666666676666666666' width='110px' height='110px' viewBox='0 0 110 110'></svg><br />
         f RUR'U' f' flips 2 to 8, moves 8 to 4, and flips 4 to 2<br />
         <svg class='cubeface P-183256749-C-666666666676666666666' width='110px' height='110px' viewBox='0 0 110 110'></svg><br />
         These can be combined to solve all the possible edge orientations;<br />
-        (F RUR'U' F') (f RUR'U' f') solves the dot case<br />
-        <svg class='cubeface P-143258769-C-606666660676066666606' width='110px' height='110px' viewBox='0 0 110 110'></svg>
-        (F RUR'U' F') solves the I case<br />
-        <svg class='cubeface P-183452769-C-606666666070666666606' width='110px' height='110px' viewBox='0 0 110 110'></svg>
-        (f RUR'U' f') solves the L case<br />
-        <svg class='cubeface P-183256749-C-606666660670666066666' width='110px' height='110px' viewBox='0 0 110 110'></svg>
+        Dot: <svg class='cubeface P-143258769-C-606666660676066666606' width='110px' height='110px' viewBox='0 0 110 110'></svg> (F RUR'U' F') (f RUR'U' f')<br />
+        I: <svg class='cubeface P-183452769-C-606666666070666666606' width='110px' height='110px' viewBox='0 0 110 110'></svg> (F RUR'U' F')<br />
+        L: <svg class='cubeface P-183256749-C-606666660670666066666' width='110px' height='110px' viewBox='0 0 110 110'></svg> (f RUR'U' f')
       </div>
       <div id="corner-oll-0" class="leveled level-0-0">
         Simple Corner OLL<br />
@@ -190,18 +206,39 @@
 
         By looking at the different corners and seeing how many rotations they need, modulo 3, we can rotate all the corners into the correct orientation.
       </div>
-      <div id="corner-pll-simple" class="leveled level-0-0">
+      <div id="corner-oll-1-2" class="leveled level-1-2">
+        2-Look OLL, Corners<br />
+        Sune: <svg class='cubeface C-066667606777660766660' width='110px' height='110px' viewBox='0 0 110 110'></svg> RUR'URU2R'<br />
+        Anti-sune: <svg class='cubeface C-666067066777666760066' width='110px' height='110px' viewBox='0 0 110 110'></svg> RU'2R'U'RU'R'<br />
+        H: <svg class='cubeface C-060667666777666766060' width='110px' height='110px' viewBox='0 0 110 110'></svg> F RUR'U' RUR'U' RUR'U' F'<br />
+        L: <svg class='cubeface C-666607606777666706066' width='110px' height='110px' viewBox='0 0 110 110'></svg> T: <svg class='cubeface C-066667066777666706066' width='110px' height='110px' viewBox='0 0 110 110'></svg> rUR'U' r'FRF'<br />
+        Pi: <svg class='cubeface C-660067666777606766660' width='110px' height='110px' viewBox='0 0 110 110'></svg> RU'2 R'2U' R2U' R'2U'2R<br />
+        U: <svg class='cubeface C-666607066777666766060' width='110px' height='110px' viewBox='0 0 110 110'></svg> R2DR'U2  RD'R'U2R'
+      </div>
+      <div id="corner-pll-0" class="leveled level-0-0">
         Simple Corner PLL<br />
         RUR'U' R'F R2U'R'U' RUR'F'<br />
         Swaps 3 and 9, and 4 and 6<br />
         <svg class='cubeface P-129654783-C-666677766777667776666' width='110px' height='110px' viewBox='0 0 110 110'></svg>
         This can be used several times to swap the corners around until they are in the correct position relative to each other.
       </div>
-      <div id="edge-pll-simple" class="leveled level-0-0">
+      <div id="corner-pll-1-2" class="leveled level-1-2">
+        2-Look Corner PLL<br />
+        T: <svg class='cubeface P-129654783-C-666677766777667776666' width='110px' height='110px' viewBox='0 0 110 110'></svg> (RUR'U' R'FR) (RU'R'U'RUR'F')<br />
+        Y: <svg class='cubeface P-943256781-C-666677766777667776666' width='110px' height='110px' viewBox='0 0 110 110'></svg> F (RU'R'U'RUR'F') (RUR'U' R'FR) F'
+      </div>
+      <div id="edge-pll-0" class="leveled level-0-0">
         Simple Edge PLL<br />
         M2 U' M' U'2 M U' M2<br />
         Rotates 4, 6, and 8 clockwise<br />
         <svg class='cubeface P-123658749-C-777777776777677777767' width='110px' height='110px' viewBox='0 0 110 110'></svg>
+      </div>
+      <div id="edge-pll-1-2" class="leveled level-1-2">
+        2-Look Edge PLL<br />
+        Ua: <svg class='cubeface P-123854769-C-777777776777677777767' width='110px' height='110px' viewBox='0 0 110 110'></svg> M2 U M' U'2 M U M2<br />
+        Ub: <svg class='cubeface P-123658749-C-777777776777677777767' width='110px' height='110px' viewBox='0 0 110 110'></svg> M2 U' M' U'2 M U' M2<br />
+        H: <svg class='cubeface P-183654729-C-767777776777677777767' width='110px' height='110px' viewBox='0 0 110 110'></svg> M2U' M2U' U'M2 U'M2<br />
+        Z: <svg class='cubeface P-143258769-C-767777776777677777767' width='110px' height='110px' viewBox='0 0 110 110'></svg> MU' M2U' M2U' MU' U'M2U<br />
       </div>
     </div>
 
