@@ -19,25 +19,108 @@ class Cube :
         z  = (1432)
         z' = (1234)
 
-        Using the original position of a piece, its current position and its rotation carry the same information. This means we can both express an operation on a group of pieces as a set of rotations, as well as a permution of locations.
+        This means we can list all 24 rotations as follows:
+
+        # Rot   Perm     Ops
+        o 1234           e
+        
+        x 3421  (1324)   x
+        r 4312  (1423)   x'
+        y 3142  (1342)   y
+        s 2413  (1243)   y'
+        z 4123  (1432)   z
+        t 2341  (1234)   z'
+        
+        u 2143  (12)(34) xx
+        v 4321  (14)(23) yy
+        w 3412  (13)(24) zz
+        
+        a 4213  (143)    xy   = yz'  = z'x
+        b 1342  (234)    xy'  = y'z  = zx
+        c 2314  (123)    xz   = yx   = zy
+        d 4132  (142)    xz'  = y'x  = z'y' 
+        e 2431  (124)    x'y  = yz   = zx'
+        f 3124  (132)    x'y' = y'z' = z'x'
+        g 3241  (134)    x'z  = y'x' = zy'
+        h 1423  (243)    x'z' = yx'  = z'y
+        
+        i 1243  (34)     xzz  = x'yy = yxz   = yyx    = yzy    = y'xz' = y'z'y' = zx'y' = zyz    = zzx'   = z'x'y' = z'y'z'
+        j 1324  (23)     xxy  = xyz' = xz'x  = x'yz   = x'zx'  = yzz   = y'xx   = zx'z  = zy'x'  = zzy'   = z'xz'  = z'y'x
+        k 1432  (24)     xxz  = xyx  = xzy   = x'y'x' = x'zy'  = yxy   = yyz'   = yz'x  = y'x'y' = y'z'x' = zyy    = z'xx
+        l 2134  (12)     xyy  = x'zz = yx'z' = yyx'   = yz'y   = y'x'z = y'zy'  = zxy'  = zy'z   = zzx    = z'xy   = z'yz'
+        m 3214  (13)     xxz' = xy'x = xz'y' = x'yx'  = x'z'y  = yx'y  = yyz    = yzx'  = y'xy'  = y'zx   = zxx    = z'yy
+        n 4231  (14)     xxy  = xy'z = xzx   = x'y'z' = x'z'x' = yxx   = y'zz   = zxz   = zyx    = zzy    = z'x'z' = z'yx'
+        
+        Using the original position of a piece, its current position and its rotation carry the same information. This means we can express an operation on a group of pieces a permutation too. For this reason, we assign a single letter name to each rotation.
     """
-    class Operation :
-        pass
+
+    x  = "(1324)"
+    xp = "(1423)"
+    y  = "(1342)"
+    yp = "(1243)"
+    z  = "(1432)"
+    zp = "(1234)"
 
     def __init__ ( self ) :
         self.pieces = {}
+        self.operations = {}
     
     def add_group ( self, name ) :
-        self.pieces[name] = {}
+        self.pieces[name] = ["1234" for i in range(24)]
+
+    def add_operation ( self, name, operation ) :
+        self.operations[name] = operation
 
 class Cube3 ( Cube ) :
 
     def __init__ ( self ) :
         super().__init__()
+        self.add_group("corners")
+        self.add_group("edges")
+        self.add_group("centers")
+        self.add_group("core")
+
+        self.add_operation("I", "")
+
+    def dump ( self ) :
+        print("Cube3")
+        for group in self.pieces :
+            print(f"  {group}: {self.pieces[group]}")
+        for operation in self.operations :
+            print(f"  {operation}: {self.operations[operation]}")
 
 if __name__ == "__main__" :
-    pass
+    cube = Cube3()
+    cube.dump()
     
+    dict = {}
+    for step1 in [Cube.x, Cube.xp, Cube.y, Cube.yp, Cube.z, Cube.zp] :
+        pattern = "1234"
+        new_pattern = ["0" for i in range(4)]
+        for prev, new in zip(step1[1:-1], step1[2:-1]+step1[1]) :
+            new_pattern[pattern.index(prev)] = pattern[pattern.index(new)]
+        pattern1 = "".join(new_pattern)
+        if pattern1 not in dict :
+            dict[pattern1] = []
+        dict[pattern1].append(f"{step1}".replace("(1324)", "x").replace("(1423)", "x'").replace("(1342)", "y").replace("(1243)", "y'"). replace("(1432)", "z").replace("(1234)", "z'"))
+        for step2 in [Cube.x, Cube.xp, Cube.y, Cube.yp, Cube.z, Cube.zp] :
+            new_pattern = ["0" for i in range(4)]
+            for prev, new in zip(step2[1:-1], step2[2:-1]+step2[1]) :
+                new_pattern[pattern1.index(prev)] = pattern1[pattern1.index(new)]
+            pattern2 = "".join(new_pattern)
+            if pattern2 not in dict :
+                dict[pattern2] = []
+            dict[pattern2].append(f"{step1+step2}".replace("(1324)", "x").replace("(1423)", "x'").replace("(1342)", "y").replace("(1243)", "y'"). replace("(1432)", "z").replace("(1234)", "z'"))
+            for step3 in [Cube.x, Cube.xp, Cube.y, Cube.yp, Cube.z, Cube.zp] :
+                new_pattern = ["0" for i in range(4)]
+                for prev, new in zip(step3[1:-1], step3[2:-1]+step3[1]) :
+                    new_pattern[pattern2.index(prev)] = pattern2[pattern2.index(new)]
+                pattern3 = "".join(new_pattern)
+                if pattern3 not in dict :
+                    dict[pattern3] = []
+                dict[pattern3].append(f"{step1+step2+step3}".replace("(1324)", "x").replace("(1423)", "x'").replace("(1342)", "y").replace("(1243)", "y'"). replace("(1432)", "z").replace("(1234)", "z'"))
+    for pattern in dict :
+        print(f"{pattern}: {dict[pattern]}")
 
 """
 
