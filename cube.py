@@ -3,6 +3,44 @@ import random
 
 class Cube :
     """
+        A Cube is an abstract object with disjoint groups of rotation-cyclic states of size 24.
+
+        Since pieces are always axis-aligned, an orientation can be expressed as a permutation of the diagonals, giving us 24 axis-aligned states.
+
+        We arbitrarily assign the diagonals as 1, 2, 3, 4 being the diagonals starting from the topleft, topright, bottomleft, and bottomright pieces of the top face.
+        We name the horizontal axis as x, the vertical axis as y, and the depth axis as z, and use clockwise rotations as positive and counterclockwise as negative, indicated by the prime symbol.
+
+        This gives us a way to both represent the current rotation of a piece, as well as a rotation operation by means of a cyclic permutation.
+
+        x  = (1324)
+        x' = (1423)
+        y  = (1342)
+        y' = (1243)
+        z  = (1432)
+        z' = (1234)
+
+        Using the original position of a piece, its current position and its rotation carry the same information. This means we can both express an operation on a group of pieces as a set of rotations, as well as a permution of locations.
+    """
+    class Operation :
+        pass
+
+    def __init__ ( self ) :
+        self.pieces = {}
+    
+    def add_group ( self, name ) :
+        self.pieces[name] = {}
+
+class Cube3 ( Cube ) :
+
+    def __init__ ( self ) :
+        super().__init__()
+
+if __name__ == "__main__" :
+    pass
+    
+
+"""
+
         A Cube is an arbitrarily sized cube of pieces.
         The state of the cube can be expressed as a full nested matrix of positions, holding the piece and orientation. Because the position of a piece can be determined by its orientation, it is possible to express the entire state of the cube as a single string of rotation letters. All 24 axis aligned rotations can be represented by a single letter, or using the two letter notation of the top and front face colors relative to the root white-green color. This is internally kept as a dictionary of piece names to rotation operations, as to not be tied to a specific order of pieces.
 
@@ -13,7 +51,7 @@ class Cube :
         Every basic move influences nine pieces, but since the center pieces have only one visible side, their orientation is ambiguous, so while you can speak of "even" and "odd" distanced cubes, this is practically irrelevant.
 
         Technically, because of parity, the six centers could be combined into a single piece and one edge and corner could be omitted.
-    """
+    
 
     standard_order = ["WGO", "WGR", "WBO", "WBR", "YGO", "YGR", "YBO", "YBR", "WG", "WB", "WO", "WR", "YG", "YB", "YO", "YR", "GO", "GR", "BO", "BR", "W", "Y", "G", "B", "O", "R"]
 
@@ -183,7 +221,7 @@ class Cube :
         # 2-Look OLL
         "OLL-Dot"      : "a: F R U R' U' F' f R U R' U' f'",
         "OLL-I-Shape"  : "a: F R U R' U' F'",
-        "OLL-L=Shape"  : "a: f R U R' U' f'",
+        "OLL-L-Shape"  : "a: f R U R' U' f'",
         "OLL-Antisune" : "a: R U2 R' U' R U' R'",
         "OLL-H"        : "a: R U R' U R U' R' U R U2 R'",
         "OLL-L"        : "a: F R' F' r U R U' r'",
@@ -446,7 +484,7 @@ class Solver :
         print(f"  Current state: {self.cube}")
 
 if __name__ == "__main__" :
-    """
+    ""
     (Cube("init", "-myi---- crgm-------- ------") * "a: OLL-32 PLL-T").dump()
     (Cube("init", "tjmy---- c-x--------- ------") * "a: OLL-31 PLL-Y").dump()
     (Cube("init", "v-ik---- sjgw-------- ------") * "a: OLL-9 U PLL-T U PLL-UaR U").dump()
@@ -461,9 +499,9 @@ if __name__ == "__main__" :
     (Cube("init", "smjb---- mi-b-------- ------") * "a: OLL-44 U PLL-Ga U").dump()
     (Cube("init", "vs-w---- c-mk-------- ------") * "a: OLL-12 PLL-V y' U'").dump()
     # print(Cube("????---- ????-------- ------") * "a: ")
-    """
+    ""
 
-    
+    ""
     scrambler = Scrambler()
     for i in range(1) :
         cube = scrambler.new()
@@ -472,9 +510,9 @@ if __name__ == "__main__" :
         solver.solve_cross()
     for cube in scrambler.scrambles :
         print(cube)
-    
+    ""
 
-    """
+    ""
     (Cube("scramble", "lvhi hvis mipk bxkv uxt- -jk---") * "a: ").dump()
     (Cube("scramble", "iztq cc-- avcm mav- aqq- ggnnl-") * "a: ").dump()
     (Cube("scramble", "bszk uung lmyt bjfk jiqy mmk--f") * "a: ").dump()
@@ -485,33 +523,33 @@ if __name__ == "__main__" :
     (Cube("scramble", "ussj hvtv qxvp qrpj zhru ---h--") * "a: ").dump()
     (Cube("scramble", "i-c- qrvw lxml awqm rkqg m-hhf-") * "a: ").dump()
     (Cube("scramble", "qwvr yhky bkau fcfl u-cy --nkff") * "a: ").dump()
-    """
+    ""
 
     cube = Cube("base", "---- ---- ---- ---- ---- ------")
-    for i in range(1) :
-        scramble = scrambler.new()
-        print(f"Distance check: {cube.distance(scramble)}")
+    cube *= "a: OLL-Pi OLL-Pi"
+    cube.dump()
 
-    """
-    for i in range(57) :
-        alg = Cube.algorithms[f"OLL-{i+1}"]
-        cube = Cube("init") * alg
-        cube.name = f"OLL-{i+1}"
-        print(cube)
-    """
+    # PLL-T:  -j-g ---- --mm ---- ---- j-----
+    # OLL-T:  s-ij ---- ---- ---- ---- ----if
+    #         f-gw ---- ---- ---- ---- ----ll
+    # OLL-Pi: vptq ---- mjj- ---- ---- m-----
+    #         ---- ---- gmg- ---- ---- ------
+
 
     # (Cube("init", "s-ij---- -jmj-------- ------") * "a: OLL-L y2 PLL-UbM y2").dump()
-    (Cube("init", "tbry---- ------------ ------") * "a: U2 R' F2 R U2 R U2 R' F2 U' R U' R' U PLL-UbM U").dump()
+    # (Cube("init", "tbry---- ------------ ------") * "a: U2 R' F2 R U2 R U2 R' F2 U' R U' R' U PLL-UbM U").dump()
     # U2 OLL-Pi U' PLL-Aa x' U PLL-UaM
     # U2 (R U2 R2 U' R2 U' R2 U2 R) U' (x L2 D2 L' U' L D2 L' U L') x' U (M2 U M U2 M' U M2)
     # U2 R' F2 R U2 R U2 R' F2 U' R U' R' U M2 U M U2 M' U M2 U
 
-    """
+    ""
          . v   . .   v .   y .  |   .     .     .     .
         .g ms .m jb .- g. kj -. |   .     -     .     j
                                 | .. .. .j .. .- m. .. -. 
         .- j. .g -s .j mr .m gb |   -     .     .     .
          t .   c .   i .   w i  |   .     .     .     .
-    """
+    ""
 
 # A3a1) The competitor is allotted a maximum of 15 seconds to inspect the puzzle and start the solve.
+
+"""
