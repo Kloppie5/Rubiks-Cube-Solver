@@ -54,73 +54,162 @@ class Cube :
         Using the original position of a piece, its current position and its rotation carry the same information. This means we can express an operation on a group of pieces a permutation too. For this reason, we assign a single letter name to each rotation.
     """
 
-    x  = "(1324)"
-    xp = "(1423)"
-    y  = "(1342)"
-    yp = "(1243)"
-    z  = "(1432)"
-    zp = "(1234)"
+    rotations = {
+        "-" : (1, 2, 3, 4),
+        "x" : (3, 4, 2, 1),
+        "r" : (4, 3, 1, 2),
+        "y" : (3, 1, 4, 2),
+        "s" : (2, 4, 1, 3),
+        "z" : (4, 1, 2, 3),
+        "t" : (2, 3, 4, 1),
+        "u" : (2, 1, 4, 3),
+        "v" : (4, 3, 2, 1),
+        "w" : (3, 4, 1, 2),
+        "a" : (4, 2, 1, 3),
+        "b" : (1, 3, 4, 2),
+        "c" : (2, 3, 1, 4),
+        "d" : (4, 1, 3, 2),
+        "e" : (2, 4, 3, 1),
+        "f" : (3, 1, 2, 4),
+        "g" : (3, 2, 4, 1),
+        "h" : (1, 4, 2, 3),
+        "i" : (1, 2, 4, 3),
+        "j" : (1, 3, 2, 4),
+        "k" : (1, 4, 3, 2),
+        "l" : (2, 1, 3, 4),
+        "m" : (3, 2, 1, 4),
+        "n" : (4, 2, 3, 1)
+    }
 
-    def __init__ ( self ) :
-        self.pieces = {}
+    def __init__ ( self, size ) :
+        self.size = size
+        self.pieces = ["-" for x in range(size * size * size)]
+        self.root_operation = {}
         self.operations = {}
-    
-    def add_group ( self, name ) :
-        self.pieces[name] = ["1234" for i in range(24)]
 
-    def add_operation ( self, name, operation ) :
-        self.operations[name] = operation
+    def add_root_operation ( self, name, rotations, permutations ) :
+        self.root_operation[name] = (rotations, permutations)
+    def add_operation ( self, name, operations ) :
+        self.operations[name] = operations
+    def apply_operations ( self, operations ) :
+        for operation in operations.split(" ") :
+            self.apply_operation(operation)
+    def apply_operation ( self, operation ) :
+        for operation in self.operations[operation].split(" ") :
+            self.apply_root_operation(operation)
+    def apply_root_operation ( self, name ) :
+        self.apply(self.root_operation[name][0], self.root_operation[name][1])
+    def apply ( self, rotations, permutations ) :
+        # Rotation
+        self.pieces = [
+            [k for k, v in Cube.rotations.items() if v == tuple(
+                [Cube.rotations[self.pieces[i]][Cube.rotations[rotations[i]][x] - 1]
+                for x in range(4)]
+            )][0]
+        for i in range(self.size * self.size * self.size)]
+        # Permutation
+        for perm in permutations :
+            for (old, new) in list(zip(perm[:-1], perm[1:]))[::-1] :
+                self.pieces[old], self.pieces[new] = self.pieces[new], self.pieces[old]
 
 class Cube3 ( Cube ) :
 
-    def __init__ ( self ) :
-        super().__init__()
-        self.add_group("corners")
-        self.add_group("edges")
-        self.add_group("centers")
-        self.add_group("core")
+    """
+        i=00 i=01 i=02 
+        i=03 i=04 i=05 
+        i=06 i=07 i=08 
 
-        self.add_operation("I", "")
+        i=09 i=10 i=11 
+        i=12 i=13 i=14 
+        i=15 i=16 i=17 
+
+        i=18 i=19 i=20 
+        i=21 i=22 i=23 
+        i=24 i=25 i=26 
+    """
+
+    def __init__ ( self ) :
+        super().__init__(3)
+        self.add_root_operation("x1", "x--x--x--x--x--x--x--x--x--", [[ 0,  6, 24, 18], [ 3, 15, 21,  9], [12]])
+        self.add_root_operation("x2", "-x--x--x--x--x--x--x--x--x-", [[ 1,  7, 25, 19], [ 4, 16, 22, 10], [13]])
+        self.add_root_operation("x3", "--x--x--x--x--x--x--x--x--x", [[ 2,  8, 26, 20], [ 5, 17, 23, 11], [14]])
+        self.add_root_operation("y1", "------------------yyyyyyyyy", [[18, 24, 26, 20], [19, 21, 25, 23], [22]])
+        self.add_root_operation("y2", "---------yyyyyyyyy---------", [[ 9, 15, 17, 11], [10, 12, 16, 14], [13]])
+        self.add_root_operation("y3", "yyyyyyyyy------------------", [[ 0,  6,  8,  2], [ 1,  3,  7,  5], [ 4]])
+        self.add_root_operation("z1", "zzz------zzz------zzz------", [[ 0, 18, 20,  2], [ 1,  9, 19, 11], [10]])
+        self.add_root_operation("z2", "---zzz------zzz------zzz---", [[ 3, 21, 23,  5], [ 4, 12, 22, 14], [13]])
+        self.add_root_operation("z3", "------zzz------zzz------zzz", [[ 6, 24, 26,  8], [ 7, 15, 25, 17], [16]])
+
+        self.add_operation("L",  "x1")
+        self.add_operation("L2", "x1 x1")
+        self.add_operation("L'", "x1 x1 x1")
+        self.add_operation("M",  "x2")
+        self.add_operation("M2", "x2 x2")
+        self.add_operation("M'", "x2 x2 x2")
+        self.add_operation("R",  "x3 x3 x3")
+        self.add_operation("R2", "x3 x3")
+        self.add_operation("R'", "x3")
+        self.add_operation("U",  "y3 y3 y3")
+        self.add_operation("U2", "y3 y3")
+        self.add_operation("U'", "y3")
+        self.add_operation("E",  "y2")
+        self.add_operation("E2", "y2 y2")
+        self.add_operation("E'", "y2 y2 y2")
+        self.add_operation("D",  "y1")
+        self.add_operation("D2", "y1 y1")
+        self.add_operation("D'", "y1 y1 y1")
+        self.add_operation("B",  "z1")
+        self.add_operation("B2", "z1 z1")
+        self.add_operation("B'", "z1 z1 z1")
+        self.add_operation("S",  "z2 z2 z2")
+        self.add_operation("S2", "z2 z2")
+        self.add_operation("S'", "z2")
+        self.add_operation("F",  "z3 z3 z3")
+        self.add_operation("F2", "z3 z3")
+        self.add_operation("F'", "z3")
+
+        self.add_operation("l",  "x1 x2")
+        self.add_operation("l2", "x1 x1 x2 x2")
+        self.add_operation("l'", "x1 x1 x1 x2 x2 x2")
+        self.add_operation("r",  "x2 x2 x2 x3 x3 x3")
+        self.add_operation("r2", "x2 x2 x3 x3")
+        self.add_operation("r'", "x2 x3")
+        self.add_operation("d",  "y1 y2")
+        self.add_operation("d2", "y1 y1 y2 y2")
+        self.add_operation("d'", "y1 y1 y1 y2 y2 y2")
+        self.add_operation("u",  "y2 y2 y2 y3 y3 y3")
+        self.add_operation("u2", "y2 y2 y3 y3")
+        self.add_operation("u'", "y2 y3")
+        self.add_operation("b",  "z1 z2")
+        self.add_operation("b2", "z1 z1 z2 z2")
+        self.add_operation("b'", "z1 z1 z1 z2 z2 z2")
+        self.add_operation("f",  "z2 z2 z2 z3 z3 z3")
+        self.add_operation("f2", "z2 z2 z3 z3")
+        self.add_operation("f'", "z2 z3")
+
+        self.add_operation("x",  "x1 x1 x1 x2 x2 x2 x3 x3 x3")
+        self.add_operation("x2", "x1 x1 x2 x2 x3 x3")
+        self.add_operation("x'", "x1 x2 x3")
+        self.add_operation("y",  "y1 y1 y1 y2 y2 y2 y3 y3 y3")
+        self.add_operation("y2", "y1 y1 y2 y2 y3 y3")
+        self.add_operation("y'", "y1 y2 y3")
+        self.add_operation("z",  "z1 z1 z1 z2 z2 z2 z3 z3 z3")
+        self.add_operation("z2", "z1 z1 z2 z2 z3 z3")
+        self.add_operation("z'", "z1 z2 z3")
 
     def dump ( self ) :
-        print("Cube3")
-        for group in self.pieces :
-            print(f"  {group}: {self.pieces[group]}")
-        for operation in self.operations :
-            print(f"  {operation}: {self.operations[operation]}")
+        print("".join(self.pieces))
 
 if __name__ == "__main__" :
     cube = Cube3()
-    cube.dump()
+    cube.apply_operations("R U R' U'")
+    cube.apply_operations("R U R' U'")
+    cube.apply_operations("R U R' U'")
+    cube.apply_operations("R U R' U'")
+    cube.apply_operations("R U R' U'")
+    cube.apply_operations("R U R' U'")
     
-    dict = {}
-    for step1 in [Cube.x, Cube.xp, Cube.y, Cube.yp, Cube.z, Cube.zp] :
-        pattern = "1234"
-        new_pattern = ["0" for i in range(4)]
-        for prev, new in zip(step1[1:-1], step1[2:-1]+step1[1]) :
-            new_pattern[pattern.index(prev)] = pattern[pattern.index(new)]
-        pattern1 = "".join(new_pattern)
-        if pattern1 not in dict :
-            dict[pattern1] = []
-        dict[pattern1].append(f"{step1}".replace("(1324)", "x").replace("(1423)", "x'").replace("(1342)", "y").replace("(1243)", "y'"). replace("(1432)", "z").replace("(1234)", "z'"))
-        for step2 in [Cube.x, Cube.xp, Cube.y, Cube.yp, Cube.z, Cube.zp] :
-            new_pattern = ["0" for i in range(4)]
-            for prev, new in zip(step2[1:-1], step2[2:-1]+step2[1]) :
-                new_pattern[pattern1.index(prev)] = pattern1[pattern1.index(new)]
-            pattern2 = "".join(new_pattern)
-            if pattern2 not in dict :
-                dict[pattern2] = []
-            dict[pattern2].append(f"{step1+step2}".replace("(1324)", "x").replace("(1423)", "x'").replace("(1342)", "y").replace("(1243)", "y'"). replace("(1432)", "z").replace("(1234)", "z'"))
-            for step3 in [Cube.x, Cube.xp, Cube.y, Cube.yp, Cube.z, Cube.zp] :
-                new_pattern = ["0" for i in range(4)]
-                for prev, new in zip(step3[1:-1], step3[2:-1]+step3[1]) :
-                    new_pattern[pattern2.index(prev)] = pattern2[pattern2.index(new)]
-                pattern3 = "".join(new_pattern)
-                if pattern3 not in dict :
-                    dict[pattern3] = []
-                dict[pattern3].append(f"{step1+step2+step3}".replace("(1324)", "x").replace("(1423)", "x'").replace("(1342)", "y").replace("(1243)", "y'"). replace("(1432)", "z").replace("(1234)", "z'"))
-    for pattern in dict :
-        print(f"{pattern}: {dict[pattern]}")
+    cube.dump()
 
 """
 
