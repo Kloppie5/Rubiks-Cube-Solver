@@ -123,8 +123,9 @@ class Cube :
             if operation == "|" :
                 self.dump()
             else :
-                self.apply(operation, self.operations[operation][0], self.operations[operation][1])
-    def apply ( self, name, rotations, permutations ) :
+                self.apply(operation)
+    def apply ( self, name ) :
+        rotations, permutations = self.operations[name]
         prev = "".join(self.pieces)
         # Rotation
         self.pieces = [
@@ -151,7 +152,15 @@ class Cube :
                 self.loc_moves[i].append("  ")
             if len(self.piece_moves[i]) < mov_len :
                 self.piece_moves[i].append("  ")
-    
+    def set_state ( self, pieces, permutations ) :
+        self.pieces = list(pieces)
+        self.piece_order = [x for x in range(self.size * self.size * self.size)]
+        self.piece_moves = [[] for _ in range(len(self.pieces))]
+        self.loc_moves = [[] for _ in range(len(self.pieces))]
+        for perm in permutations :
+            for (old, new) in list(zip(perm[:-1], perm[1:]))[::-1] :
+                self.piece_order[old], self.piece_order[new] = self.piece_order[new], self.piece_order[old]
+
     def calc_permutations ( self ) :
         permutations = []
         piece_order = [self.piece_order[i] for i in range(len(self.piece_order))]
@@ -264,7 +273,7 @@ if __name__ == "__main__" :
     # cube = Cube3()
     cube = Cube3()
     # cube.apply_operations("R' U' F R' F' R F' R2 U R F' D2 F' U2 F2 R2 B U2 D2 R2 D2 B L D2 R' U' F")
-    cube.apply("~", "hbacykkhriwzx-r---gwbu-nb-g", [[19, 11, 3, 21, 7, 23, 9, 1], [18, 26, 8, 24, 20, 6]])
+    cube.set_state("hbacykkhriwzx-r---gwbu-nb-g", [[19, 11, 3, 21, 7, 23, 9, 1], [18, 26, 8, 24, 20, 6]])
     # cube.apply_operations("F2 D' F2") # Green Cross
     
     # cube.apply_operations("U B R B R' B | D F2 R' F' R D' | F' U' F' U R F' R' | U' F' U F L' F L | F U' F' U F2 U' F' U | U F L F' L' U' | R F R' F R F2 R' | L F L' F' L' U L2 F' L' F' L F L' U' | F2 M2 F' M F2 M' F' M2")
