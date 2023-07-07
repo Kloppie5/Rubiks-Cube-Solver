@@ -21,35 +21,35 @@ class Cube :
 
         This means we can list all 24 rotations as follows:
 
-        # Rot   Perm     Ops
-        o 1234           e
+        # Rot   Perm     Col Ops
+        o 1234           WG  e
         
-        x 3421  (1324)   x
-        r 4312  (1423)   x'
-        y 3142  (1342)   y
-        s 2413  (1243)   y'
-        z 4123  (1432)   z
-        t 2341  (1234)   z'
+        x 3421  (1324)   BW  x
+        r 4312  (1423)   GY  x'
+        y 3142  (1342)   WO  y
+        s 2413  (1243)   WR  y'
+        z 4123  (1432)   RG  z
+        t 2341  (1234)   OG  z'
         
-        u 2143  (12)(34) xx
-        v 4321  (14)(23) yy
-        w 3412  (13)(24) zz
+        u 2143  (12)(34) YB  xx
+        v 4321  (14)(23) WB  yy
+        w 3412  (13)(24) YG  zz
         
-        a 4213  (143)    xy   = yz'  = z'x
-        b 1342  (234)    xy'  = y'z  = zx
-        c 2314  (123)    xz   = yx   = zy
-        d 4132  (142)    xz'  = y'x  = z'y' 
-        e 2431  (124)    x'y  = yz   = zx'
-        f 3124  (132)    x'y' = y'z' = z'x'
-        g 3241  (134)    x'z  = y'x' = zy'
-        h 1423  (243)    x'z' = yx'  = z'y
+        a 4213  (143)    BO  xy   = yz'  = z'x
+        b 1342  (234)    BR  xy'  = y'z  = zx
+        c 2314  (123)    RW  xz   = yx   = zy
+        d 4132  (142)    OW  xz'  = y'x  = z'y' 
+        e 2431  (124)    GO  x'y  = yz   = zx'
+        f 3124  (132)    GR  x'y' = y'z' = z'x'
+        g 3241  (134)    RY  x'z  = y'x' = zy'
+        h 1423  (243)    OY  x'z' = yx'  = z'y
         
-        i 1243  (34)     xzz  = x'yy = yxz   = yyx    = yzy    = y'xz' = y'z'y' = zx'y' = zyz    = zzx'   = z'x'y' = z'y'z'
-        j 1324  (23)     xxy  = xyz' = xz'x  = x'yz   = x'zx'  = yzz   = y'xx   = zx'z  = zy'x'  = zzy'   = z'xz'  = z'y'x
-        k 1432  (24)     xxz  = xyx  = xzy   = x'y'x' = x'zy'  = yxy   = yyz'   = yz'x  = y'x'y' = y'z'x' = zyy    = z'xx
-        l 2134  (12)     xyy  = x'zz = yx'z' = yyx'   = yz'y   = y'x'z = y'zy'  = zxy'  = zy'z   = zzx    = z'xy   = z'yz'
-        m 3214  (13)     xxz' = xy'x = xz'y' = x'yx'  = x'z'y  = yx'y  = yyz    = yzx'  = y'xy'  = y'zx   = zxx    = z'yy
-        n 4231  (14)     xxy  = xy'z = xzx   = x'y'z' = x'z'x' = yxx   = y'zz   = zxz   = zyx    = zzy    = z'x'z' = z'yx'
+        i 1243  (34)     GW  xzz  = x'yy = yxz   = yyx    = yzy    = y'xz' = y'z'y' = zx'y' = zyz    = zzx'   = z'x'y' = z'y'z'
+        j 1324  (23)     YO  xxy  = xyz' = xz'x  = x'yz   = x'zx'  = yzz   = y'xx   = zx'z  = zy'x'  = zzy'   = z'xz'  = z'y'x
+        k 1432  (24)     RB  xxz  = xyx  = xzy   = x'y'x' = x'zy'  = yxy   = yyz'   = yz'x  = y'x'y' = y'z'x' = zyy    = z'xx
+        l 2134  (12)     BY  xyy  = x'zz = yx'z' = yyx'   = yz'y   = y'x'z = y'zy'  = zxy'  = zy'z   = zzx    = z'xy   = z'yz'
+        m 3214  (13)     OB  xxz' = xy'x = xz'y' = x'yx'  = x'z'y  = yx'y  = yyz    = yzx'  = y'xy'  = y'zx   = zxx    = z'yy
+        n 4231  (14)     YR  xxy' = xy'z = xzx   = x'y'z' = x'z'x' = yxx   = y'zz   = zxz   = zyx    = zzy    = z'x'z' = z'yx'
         
         Using the original position of a piece, its current position and its rotation carry the same information. This means we can express an operation on a group of pieces a permutation too. For this reason, we assign a single letter name to each rotation.
     """
@@ -84,33 +84,86 @@ class Cube :
     def __init__ ( self, size ) :
         self.size = size
         self.pieces = ["-" for x in range(size * size * size)]
+        self.piece_order = [x for x in range(size * size * size)]
+        self.piece_moves = [[] for _ in range(len(self.pieces))]
+        self.loc_moves = [[] for _ in range(len(self.pieces))]
         self.root_operation = {}
         self.operations = {}
 
     def add_root_operation ( self, name, rotations, permutations ) :
         self.root_operation[name] = (rotations, permutations)
     def add_operation ( self, name, operations ) :
-        self.operations[name] = operations
+        pieces = ["-" for x in range(self.size * self.size * self.size)]
+        piece_order = [x for x in range(self.size * self.size * self.size)]
+        for operation in operations.split(" ") :
+            subrotations, subpermutations = self.root_operation[operation]
+            pieces = [
+                [k for k, v in Cube.rotations.items() if v == tuple(
+                    [Cube.rotations[subrotations[i]][Cube.rotations[pieces[i]][x] - 1]
+                    for x in range(4)]
+                )][0]
+            for i in range(self.size * self.size * self.size)]
+            # Permutation
+            for perm in subpermutations :
+                for (old, new) in list(zip(perm[:-1], perm[1:]))[::-1] :
+                    pieces[old], pieces[new] = pieces[new], pieces[old]
+                    piece_order[old], piece_order[new] = piece_order[new], piece_order[old]
+        permutations = []
+        for i in range(len(piece_order)) :
+            if piece_order[i] == i or piece_order[i] == -1 :
+                continue
+            permutation = []
+            while piece_order[i] != -1 :
+                permutation.append(i)
+                piece_order[i], i = -1, piece_order[i]
+            permutations.append(permutation[::-1])
+        self.operations[name] = ("".join(pieces), permutations)
     def apply_operations ( self, operations ) :
         for operation in operations.split(" ") :
-            self.apply_operation(operation)
-    def apply_operation ( self, operation ) :
-        for operation in self.operations[operation].split(" ") :
-            self.apply_root_operation(operation)
-    def apply_root_operation ( self, name ) :
-        self.apply(self.root_operation[name][0], self.root_operation[name][1])
-    def apply ( self, rotations, permutations ) :
+            if operation == "|" :
+                self.dump()
+            else :
+                self.apply(operation, self.operations[operation][0], self.operations[operation][1])
+    def apply ( self, name, rotations, permutations ) :
+        prev = "".join(self.pieces)
         # Rotation
         self.pieces = [
             [k for k, v in Cube.rotations.items() if v == tuple(
-                [Cube.rotations[self.pieces[i]][Cube.rotations[rotations[i]][x] - 1]
+                [Cube.rotations[rotations[i]][Cube.rotations[self.pieces[i]][x] - 1]
                 for x in range(4)]
             )][0]
         for i in range(self.size * self.size * self.size)]
         # Permutation
+        mov_len = len(self.piece_moves[0]) + 1
         for perm in permutations :
             for (old, new) in list(zip(perm[:-1], perm[1:]))[::-1] :
                 self.pieces[old], self.pieces[new] = self.pieces[new], self.pieces[old]
+                self.piece_order[old], self.piece_order[new] = self.piece_order[new], self.piece_order[old]
+                self.piece_moves[old], self.piece_moves[new] = self.piece_moves[new], self.piece_moves[old]
+                if len(self.piece_moves[old]) < mov_len :
+                    self.piece_moves[old].append(f"{name:2}")
+                if len(self.piece_moves[new]) < mov_len :
+                    self.piece_moves[new].append(f"{name:2}")
+        for i in range(len(self.pieces)) :
+            if self.pieces[i] != prev[i] :
+                self.loc_moves[i].append(f"{name:2}")
+            else :
+                self.loc_moves[i].append("  ")
+            if len(self.piece_moves[i]) < mov_len :
+                self.piece_moves[i].append("  ")
+    
+    def calc_permutations ( self ) :
+        permutations = []
+        piece_order = [self.piece_order[i] for i in range(len(self.piece_order))]
+        for i in range(len(piece_order)) :
+            if piece_order[i] == i or piece_order[i] == -1 :
+                continue
+            permutation = []
+            while piece_order[i] != -1 :
+                permutation.append(i)
+                piece_order[i], i = -1, piece_order[i]
+            permutations.append(permutation[::-1])
+        return permutations
 
 class Cube3 ( Cube ) :
 
@@ -128,17 +181,19 @@ class Cube3 ( Cube ) :
         i=24 i=25 i=26 
     """
 
-    def __init__ ( self ) :
+    def __init__ ( self, pieces = "---------------------------" ) :
         super().__init__(3)
-        self.add_root_operation("x1", "x--x--x--x--x--x--x--x--x--", [[ 0,  6, 24, 18], [ 3, 15, 21,  9], [12]])
-        self.add_root_operation("x2", "-x--x--x--x--x--x--x--x--x-", [[ 1,  7, 25, 19], [ 4, 16, 22, 10], [13]])
-        self.add_root_operation("x3", "--x--x--x--x--x--x--x--x--x", [[ 2,  8, 26, 20], [ 5, 17, 23, 11], [14]])
-        self.add_root_operation("y1", "------------------yyyyyyyyy", [[18, 24, 26, 20], [19, 21, 25, 23], [22]])
-        self.add_root_operation("y2", "---------yyyyyyyyy---------", [[ 9, 15, 17, 11], [10, 12, 16, 14], [13]])
-        self.add_root_operation("y3", "yyyyyyyyy------------------", [[ 0,  6,  8,  2], [ 1,  3,  7,  5], [ 4]])
-        self.add_root_operation("z1", "zzz------zzz------zzz------", [[ 0, 18, 20,  2], [ 1,  9, 19, 11], [10]])
-        self.add_root_operation("z2", "---zzz------zzz------zzz---", [[ 3, 21, 23,  5], [ 4, 12, 22, 14], [13]])
-        self.add_root_operation("z3", "------zzz------zzz------zzz", [[ 6, 24, 26,  8], [ 7, 15, 25, 17], [16]])
+        self.pieces = list(pieces)
+
+        self.add_root_operation("x1", "x--x--x--x--x--x--x--x--x--", [[ 0,  6, 24, 18], [ 3, 15, 21,  9]])
+        self.add_root_operation("x2", "-x--x--x--x--x--x--x--x--x-", [[ 1,  7, 25, 19], [ 4, 16, 22, 10]])
+        self.add_root_operation("x3", "--x--x--x--x--x--x--x--x--x", [[ 2,  8, 26, 20], [ 5, 17, 23, 11]])
+        self.add_root_operation("y1", "------------------yyyyyyyyy", [[18, 24, 26, 20], [19, 21, 25, 23]])
+        self.add_root_operation("y2", "---------yyyyyyyyy---------", [[ 9, 15, 17, 11], [10, 12, 16, 14]])
+        self.add_root_operation("y3", "yyyyyyyyy------------------", [[ 0,  6,  8,  2], [ 1,  3,  7,  5]])
+        self.add_root_operation("z1", "zzz------zzz------zzz------", [[ 0, 18, 20,  2], [ 1,  9, 19, 11]])
+        self.add_root_operation("z2", "---zzz------zzz------zzz---", [[ 3, 21, 23,  5], [ 4, 12, 22, 14]])
+        self.add_root_operation("z3", "------zzz------zzz------zzz", [[ 6, 24, 26,  8], [ 7, 15, 25, 17]])
 
         self.add_operation("L",  "x1")
         self.add_operation("L2", "x1 x1")
@@ -149,15 +204,15 @@ class Cube3 ( Cube ) :
         self.add_operation("R",  "x3 x3 x3")
         self.add_operation("R2", "x3 x3")
         self.add_operation("R'", "x3")
-        self.add_operation("U",  "y3 y3 y3")
-        self.add_operation("U2", "y3 y3")
-        self.add_operation("U'", "y3")
-        self.add_operation("E",  "y2")
-        self.add_operation("E2", "y2 y2")
-        self.add_operation("E'", "y2 y2 y2")
         self.add_operation("D",  "y1")
         self.add_operation("D2", "y1 y1")
         self.add_operation("D'", "y1 y1 y1")
+        self.add_operation("E",  "y2")
+        self.add_operation("E2", "y2 y2")
+        self.add_operation("E'", "y2 y2 y2")
+        self.add_operation("U",  "y3 y3 y3")
+        self.add_operation("U2", "y3 y3")
+        self.add_operation("U'", "y3")
         self.add_operation("B",  "z1")
         self.add_operation("B2", "z1 z1")
         self.add_operation("B'", "z1 z1 z1")
@@ -199,17 +254,47 @@ class Cube3 ( Cube ) :
 
     def dump ( self ) :
         print("".join(self.pieces))
+    
+    def split_view ( self ) :
+        print(f"{''.join(self.pieces)} | {self.calc_permutations()}")
+        for piece in range(len(self.pieces)) :
+            print(f"{piece:2} | {''.join(self.loc_moves[piece])} | {''.join(self.piece_moves[piece])} | {self.pieces[piece]} {Cube.rotations[self.pieces[piece]]} | {self.piece_order[piece]}")
 
 if __name__ == "__main__" :
+    # cube = Cube3()
     cube = Cube3()
-    cube.apply_operations("R U R' U'")
-    cube.apply_operations("R U R' U'")
-    cube.apply_operations("R U R' U'")
-    cube.apply_operations("R U R' U'")
-    cube.apply_operations("R U R' U'")
-    cube.apply_operations("R U R' U'")
+    # cube.apply_operations("R' U' F R' F' R F' R2 U R F' D2 F' U2 F2 R2 B U2 D2 R2 D2 B L D2 R' U' F")
+    cube.apply("~", "hbacykkhriwzx-r---gwbu-nb-g", [[19, 11, 3, 21, 7, 23, 9, 1], [18, 26, 8, 24, 20, 6]])
+    # cube.apply_operations("F2 D' F2") # Green Cross
     
-    cube.dump()
+    # cube.apply_operations("U B R B R' B | D F2 R' F' R D' | F' U' F' U R F' R' | U' F' U F L' F L | F U' F' U F2 U' F' U | U F L F' L' U' | R F R' F R F2 R' | L F L' F' L' U L2 F' L' F' L F L' U' | F2 M2 F' M F2 M' F' M2")
+    # cube.apply_operations("z2 | R2 B2 L D' B L D | y L' U2 L R' U R | U' R U R' U R U R' | y' U L' U' L | R U R' U2 R U R' U' R U R' | F R U R' U' F' | U2 R' F R B' R' F' R B | R U' R' U' R U R D R' U' R D' R' U2 R' | U' z2")
+    # cube.apply_operations("y' | L2 B L R' F R | y' L U2 L' U' L U L' | U R' U2 R U' R' U' R | y' R U R' U' R U R' U2 f R f' | y' U' R' U2 R U' R' U R | U' F R U R' U' F' | R U R' U R U2 R' | R' U' F' R U R' U' R' F | R2 U' R' U' R U R' U R")
+    # cube.dump()
+
+    cube.split_view()
+    """
+    graph = {}
+
+    for i in range(1000) :
+        random_move = random.choice(["R", "R2", "R'", "L", "L2", "L'", "U", "U2", "U'", "D", "D2", "D'", "F", "F2", "F'", "B", "B2", "B'"])
+        prev = "".join(cube.pieces)
+        cube.apply_operation(random_move)
+        if prev not in graph :
+            graph[prev] = {}
+        graph[prev][random_move] = "".join(cube.pieces)
+    
+    for state in graph :
+        print(f"{state} -> {graph[state]}")
+    """
+    """
+    U R' U' D' (Green Cross)
+    B' R B R'
+    B L B' L' L' B' L
+    B L B L'
+    B2 R' B2 R B2 R' B R (F2L)
+    """
+
 
 """
 
