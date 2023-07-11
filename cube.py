@@ -269,11 +269,47 @@ class Cube3 ( Cube ) :
         for piece in range(len(self.pieces)) :
             print(f"{piece:2} | {''.join(self.loc_moves[piece])} | {''.join(self.piece_moves[piece])} | {self.pieces[piece]} {Cube.rotations[self.pieces[piece]]} | {self.piece_order[piece]}")
 
+class PermutationMatrix :
+    """
+        A Permutation Matrix is a square matrix that is row-equivalent to the identity matrix.
+        Because proper matrix multiplication with a large matrix is slow, this is internally done by tracking index permutation cycles.
+    """
+
+    def __init__ ( self, size ) :
+        self.size = size
+        self.state = [i for i in range(size)]
+
+    def dump ( self ) :
+        for i in range(self.size) :
+            print(f"{i:3} | {self.state[i]*'-'}1{(self.size-self.state[i]-1)*'-'} | {self.state[i]:3}")
+
+class PermutationCube :
+    """
+        A Permutation Cube is a cube represented by a Permutation Matrix.
+        Each set of four rows represents a cubicle, and each set of four columns represents a cubie.
+        The four parts are the four center crossing diagonals, such that the 4x4 submatrix represents the orientation of the cubie.
+    """
+
+    def __init__ ( self, size ) :
+        self.size = size
+        self.state = PermutationMatrix(4 * size ** 3)
+
+class MOCube :
+
+    def __init__ ( self, size ) :
+        self.size = size ** 3
+        self.state = [[1 if i == j else 0 for j in range(4 * self.size)] for i in range(4 * self.size)]
+
+    def dump ( self ) :
+        print("\n".join(["".join([str(x) for x in row]) for row in self.state]))
+
 if __name__ == "__main__" :
+    cube = PermutationMatrix(4*3**3)
+    cube.dump()
     # cube = Cube3()
-    cube = Cube3()
+    # cube = Cube3()
     # cube.apply_operations("R' U' F R' F' R F' R2 U R F' D2 F' U2 F2 R2 B U2 D2 R2 D2 B L D2 R' U' F")
-    cube.set_state("hbacykkhriwzx-r---gwbu-nb-g", [[19, 11, 3, 21, 7, 23, 9, 1], [18, 26, 8, 24, 20, 6]])
+    # cube.set_state("hbacykkhriwzx-r---gwbu-nb-g", [[19, 11, 3, 21, 7, 23, 9, 1], [18, 26, 8, 24, 20, 6]])
     # cube.apply_operations("F2 D' F2") # Green Cross
     
     # cube.apply_operations("U B R B R' B | D F2 R' F' R D' | F' U' F' U R F' R' | U' F' U F L' F L | F U' F' U F2 U' F' U | U F L F' L' U' | R F R' F R F2 R' | L F L' F' L' U L2 F' L' F' L F L' U' | F2 M2 F' M F2 M' F' M2")
@@ -281,7 +317,7 @@ if __name__ == "__main__" :
     # cube.apply_operations("y' | L2 B L R' F R | y' L U2 L' U' L U L' | U R' U2 R U' R' U' R | y' R U R' U' R U R' U2 f R f' | y' U' R' U2 R U' R' U R | U' F R U R' U' F' | R U R' U R U2 R' | R' U' F' R U R' U' R' F | R2 U' R' U' R U R' U R")
     # cube.dump()
 
-    cube.split_view()
+    # cube.split_view()
     """
     graph = {}
 
