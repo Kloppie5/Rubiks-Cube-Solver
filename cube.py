@@ -174,7 +174,7 @@ class Cube :
             permutations.append(permutation[::-1])
         return permutations
 
-class Cube3 ( Cube ) :
+class Cube3Old ( Cube ) :
 
     """
         i=00 i=01 i=02 
@@ -272,16 +272,24 @@ class Cube3 ( Cube ) :
 class PermutationMatrix :
     """
         A Permutation Matrix is a square matrix that is row-equivalent to the identity matrix.
-        Because proper matrix multiplication with a large matrix is slow, this is internally done by tracking index permutation cycles.
+        Because proper matrix multiplication with a large matrix is slow, this is internally done by tracking an index array.
     """
 
-    def __init__ ( self, size ) :
-        self.size = size
-        self.state = [i for i in range(size)]
+    def __init__ ( self, state = {} ) :
+        self.state = state
+
+    def __getitem__ ( self, key ) :
+        return self.state[key] if key in self.state else key
+    def __setitem__ ( self, key, value ) :
+        self.state[key] = value
+
+    def permute ( self, i, j ) :
+        self[i], self[j] = self[j], self[i]
 
     def dump ( self ) :
-        for i in range(self.size) :
-            print(f"{i:3} | {self.state[i]*'-'}1{(self.size-self.state[i]-1)*'-'} | {self.state[i]:3}")
+        for i in range(len(self.state)) :
+            if i in self.state :
+                print(f"{i:3} | {self.state[i]*'-'}1{(len(self.state)-self.state[i]-1)*'-'} | {self.state[i]:3}")
 
 class PermutationCube :
     """
@@ -290,22 +298,20 @@ class PermutationCube :
         The four parts are the four center crossing diagonals, such that the 4x4 submatrix represents the orientation of the cubie.
     """
 
-    def __init__ ( self, size ) :
-        self.size = size
-        self.state = PermutationMatrix(4 * size ** 3)
+    def __init__ ( self, moves = [] ) :
+        self.state = PermutationMatrix()
+        for move in moves :
+            self.state.permute(*move)
 
-class MOCube :
+class Cube3 :
 
-    def __init__ ( self, size ) :
-        self.size = size ** 3
-        self.state = [[1 if i == j else 0 for j in range(4 * self.size)] for i in range(4 * self.size)]
+    x1 = PermutationCube([(0, 1)])
 
-    def dump ( self ) :
-        print("\n".join(["".join([str(x) for x in row]) for row in self.state]))
+    def __init__ ( self ) :
+        Cube3.x1.state.dump()
 
 if __name__ == "__main__" :
-    cube = PermutationMatrix(4*3**3)
-    cube.dump()
+    cube = Cube3()
     # cube = Cube3()
     # cube = Cube3()
     # cube.apply_operations("R' U' F R' F' R F' R2 U R F' D2 F' U2 F2 R2 B U2 D2 R2 D2 B L D2 R' U' F")
