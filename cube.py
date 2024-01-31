@@ -1,4 +1,5 @@
-import math
+import time
+from math import cos, pi, sin
 import pygame
 import random
 from OpenGL.GL import *
@@ -18,39 +19,39 @@ class Cube3 :
     def __init__ ( self ) :
         self.groups = {
             "core" : [
-                Cubelet( 0, 0, 0)
+                Cubelet( 0, 0, 0, 0, 0, 0, 1)
             ],
             "centers" : [
-                Cubelet( 0, 0,-1),
-                Cubelet( 0, 0, 1),
-                Cubelet( 0,-1, 0),
-                Cubelet( 0, 1, 0),
-                Cubelet(-1, 0, 0),
-                Cubelet( 1, 0, 0),
+                Cubelet( 0, 0,-1, 0, 0, 0, 1),
+                Cubelet( 0, 0, 1, 0, 0, 0, 1),
+                Cubelet( 0,-1, 0, 0, 0, 0, 1),
+                Cubelet( 0, 1, 0, 0, 0, 0, 1),
+                Cubelet(-1, 0, 0, 0, 0, 0, 1),
+                Cubelet( 1, 0, 0, 0, 0, 0, 1),
             ],
             "edges" : [
-                Cubelet( 0,-1,-1),
-                Cubelet( 0,-1, 1),
-                Cubelet( 0, 1,-1),
-                Cubelet( 0, 1, 1),
-                Cubelet(-1, 0,-1),
-                Cubelet(-1, 0, 1),
-                Cubelet( 1, 0,-1),
-                Cubelet( 1, 0, 1),
-                Cubelet(-1,-1, 0),
-                Cubelet(-1, 1, 0),
-                Cubelet( 1,-1, 0),
-                Cubelet( 1, 1, 0),
+                Cubelet( 0,-1,-1, 0, 0, 0, 1),
+                Cubelet( 0,-1, 1, 0, 0, 0, 1),
+                Cubelet( 0, 1,-1, 0, 0, 0, 1),
+                Cubelet( 0, 1, 1, 0, 0, 0, 1),
+                Cubelet(-1, 0,-1, 0, 0, 0, 1),
+                Cubelet(-1, 0, 1, 0, 0, 0, 1),
+                Cubelet( 1, 0,-1, 0, 0, 0, 1),
+                Cubelet( 1, 0, 1, 0, 0, 0, 1),
+                Cubelet(-1,-1, 0, 0, 0, 0, 1),
+                Cubelet(-1, 1, 0, 0, 0, 0, 1),
+                Cubelet( 1,-1, 0, 0, 0, 0, 1),
+                Cubelet( 1, 1, 0, 0, 0, 0, 1),
             ],
             "corners" : [
-                Cubelet(-1,-1,-1),
-                Cubelet(-1,-1, 1),
-                Cubelet(-1, 1,-1),
-                Cubelet(-1, 1, 1),
-                Cubelet( 1,-1,-1),
-                Cubelet( 1,-1, 1),
-                Cubelet( 1, 1,-1),
-                Cubelet( 1, 1, 1),
+                Cubelet(-1,-1,-1, 0, 0, 0, 1),
+                Cubelet(-1,-1, 1, 0, 0, 0, 1),
+                Cubelet(-1, 1,-1, 0, 0, 0, 1),
+                Cubelet(-1, 1, 1, 0, 0, 0, 1),
+                Cubelet( 1,-1,-1, 0, 0, 0, 1),
+                Cubelet( 1,-1, 1, 0, 0, 0, 1),
+                Cubelet( 1, 1,-1, 0, 0, 0, 1),
+                Cubelet( 1, 1, 1, 0, 0, 0, 1),
             ]
         }
     
@@ -69,102 +70,143 @@ class Cube4 :
     """
 
     def __init__ ( self ) :
+        self.s = 0.3
         self.groups = {
             "core" : [
-                Cubelet(-0.5,-0.5,-0.5),
-                Cubelet(-0.5,-0.5, 0.5),
-                Cubelet(-0.5, 0.5,-0.5),
-                Cubelet(-0.5, 0.5, 0.5),
-                Cubelet( 0.5,-0.5,-0.5),
-                Cubelet( 0.5,-0.5, 0.5),
-                Cubelet( 0.5, 0.5,-0.5),
-                Cubelet( 0.5, 0.5, 0.5)
+                Cubelet(-0.5,-0.5,-0.5, 0, 0, 0, 1),
+                Cubelet(-0.5,-0.5, 0.5, 0, 0, 0, 1),
+                Cubelet(-0.5, 0.5,-0.5, 0, 0, 0, 1),
+                Cubelet(-0.5, 0.5, 0.5, 0, 0, 0, 1),
+                Cubelet( 0.5,-0.5,-0.5, 0, 0, 0, 1),
+                Cubelet( 0.5,-0.5, 0.5, 0, 0, 0, 1),
+                Cubelet( 0.5, 0.5,-0.5, 0, 0, 0, 1),
+                Cubelet( 0.5, 0.5, 0.5, 0, 0, 0, 1)
             ],
             "centers" : [
-                Cubelet(-0.5,-0.5,-1.5),
-                Cubelet(-0.5,-0.5, 1.5),
-                Cubelet(-0.5, 0.5,-1.5),
-                Cubelet(-0.5, 0.5, 1.5),
-                Cubelet( 0.5,-0.5,-1.5),
-                Cubelet( 0.5,-0.5, 1.5),
-                Cubelet( 0.5, 0.5,-1.5),
-                Cubelet( 0.5, 0.5, 1.5),
+                Cubelet(-0.5,-0.5,-1.5, 0, 0, 0, 1),
+                Cubelet(-0.5,-0.5, 1.5, 0, 0, 0, 1),
+                Cubelet(-0.5, 0.5,-1.5, 0, 0, 0, 1),
+                Cubelet(-0.5, 0.5, 1.5, 0, 0, 0, 1),
+                Cubelet( 0.5,-0.5,-1.5, 0, 0, 0, 1),
+                Cubelet( 0.5,-0.5, 1.5, 0, 0, 0, 1),
+                Cubelet( 0.5, 0.5,-1.5, 0, 0, 0, 1),
+                Cubelet( 0.5, 0.5, 1.5, 0, 0, 0, 1),
 
-                Cubelet(-0.5,-1.5,-0.5),
-                Cubelet(-0.5, 1.5,-0.5),
-                Cubelet(-0.5,-1.5, 0.5),
-                Cubelet(-0.5, 1.5, 0.5),
-                Cubelet( 0.5,-1.5,-0.5),
-                Cubelet( 0.5, 1.5,-0.5),
-                Cubelet( 0.5,-1.5, 0.5),
-                Cubelet( 0.5, 1.5, 0.5),
+                Cubelet(-0.5,-1.5,-0.5, 0, 0, 0, 1),
+                Cubelet(-0.5, 1.5,-0.5, 0, 0, 0, 1),
+                Cubelet(-0.5,-1.5, 0.5, 0, 0, 0, 1),
+                Cubelet(-0.5, 1.5, 0.5, 0, 0, 0, 1),
+                Cubelet( 0.5,-1.5,-0.5, 0, 0, 0, 1),
+                Cubelet( 0.5, 1.5,-0.5, 0, 0, 0, 1),
+                Cubelet( 0.5,-1.5, 0.5, 0, 0, 0, 1),
+                Cubelet( 0.5, 1.5, 0.5, 0, 0, 0, 1),
 
-                Cubelet(-1.5,-0.5,-0.5),
-                Cubelet( 1.5,-0.5,-0.5),
-                Cubelet(-1.5,-0.5, 0.5),
-                Cubelet( 1.5,-0.5, 0.5),
-                Cubelet(-1.5, 0.5,-0.5),
-                Cubelet( 1.5, 0.5,-0.5),
-                Cubelet(-1.5, 0.5, 0.5),
-                Cubelet( 1.5, 0.5, 0.5),
+                Cubelet(-1.5,-0.5,-0.5, 0, 0, 0, 1),
+                Cubelet( 1.5,-0.5,-0.5, 0, 0, 0, 1),
+                Cubelet(-1.5,-0.5, 0.5, 0, 0, 0, 1),
+                Cubelet( 1.5,-0.5, 0.5, 0, 0, 0, 1),
+                Cubelet(-1.5, 0.5,-0.5, 0, 0, 0, 1),
+                Cubelet( 1.5, 0.5,-0.5, 0, 0, 0, 1),
+                Cubelet(-1.5, 0.5, 0.5, 0, 0, 0, 1),
+                Cubelet( 1.5, 0.5, 0.5, 0, 0, 0, 1),
             ],
             "edges" : [
-                Cubelet(-0.5,-1.5,-1.5),
-                Cubelet(-0.5,-1.5, 1.5),
-                Cubelet(-0.5, 1.5,-1.5),
-                Cubelet(-0.5, 1.5, 1.5),
-                Cubelet( 0.5,-1.5,-1.5),
-                Cubelet( 0.5,-1.5, 1.5),
-                Cubelet( 0.5, 1.5,-1.5),
-                Cubelet( 0.5, 1.5, 1.5),
+                Cubelet(-0.5,-1.5,-1.5, 0, 0, 0, 1),
+                Cubelet(-0.5,-1.5, 1.5, 0, 0, 0, 1),
+                Cubelet(-0.5, 1.5,-1.5, 0, 0, 0, 1),
+                Cubelet(-0.5, 1.5, 1.5, 0, 0, 0, 1),
+                Cubelet( 0.5,-1.5,-1.5, 0, 0, 0, 1),
+                Cubelet( 0.5,-1.5, 1.5, 0, 0, 0, 1),
+                Cubelet( 0.5, 1.5,-1.5, 0, 0, 0, 1),
+                Cubelet( 0.5, 1.5, 1.5, 0, 0, 0, 1),
                 
-                Cubelet(-1.5,-0.5,-1.5),
-                Cubelet(-1.5,-0.5, 1.5),
-                Cubelet( 1.5,-0.5,-1.5),
-                Cubelet( 1.5,-0.5, 1.5),
-                Cubelet(-1.5, 0.5,-1.5),
-                Cubelet(-1.5, 0.5, 1.5),
-                Cubelet( 1.5, 0.5,-1.5),
-                Cubelet( 1.5, 0.5, 1.5),
+                Cubelet(-1.5,-0.5,-1.5, 0, 0, 0, 1),
+                Cubelet(-1.5,-0.5, 1.5, 0, 0, 0, 1),
+                Cubelet( 1.5,-0.5,-1.5, 0, 0, 0, 1),
+                Cubelet( 1.5,-0.5, 1.5, 0, 0, 0, 1),
+                Cubelet(-1.5, 0.5,-1.5, 0, 0, 0, 1),
+                Cubelet(-1.5, 0.5, 1.5, 0, 0, 0, 1),
+                Cubelet( 1.5, 0.5,-1.5, 0, 0, 0, 1),
+                Cubelet( 1.5, 0.5, 1.5, 0, 0, 0, 1),
                 
-                Cubelet(-1.5,-1.5,-0.5),
-                Cubelet(-1.5, 1.5,-0.5),
-                Cubelet( 1.5,-1.5,-0.5),
-                Cubelet( 1.5, 1.5,-0.5),
-                Cubelet(-1.5,-1.5, 0.5),
-                Cubelet(-1.5, 1.5, 0.5),
-                Cubelet( 1.5,-1.5, 0.5),
-                Cubelet( 1.5, 1.5, 0.5),
+                Cubelet(-1.5,-1.5,-0.5, 0, 0, 0, 1),
+                Cubelet(-1.5, 1.5,-0.5, 0, 0, 0, 1),
+                Cubelet( 1.5,-1.5,-0.5, 0, 0, 0, 1),
+                Cubelet( 1.5, 1.5,-0.5, 0, 0, 0, 1),
+                Cubelet(-1.5,-1.5, 0.5, 0, 0, 0, 1),
+                Cubelet(-1.5, 1.5, 0.5, 0, 0, 0, 1),
+                Cubelet( 1.5,-1.5, 0.5, 0, 0, 0, 1),
+                Cubelet( 1.5, 1.5, 0.5, 0, 0, 0, 1),
             ],
             "corners" : [
-                Cubelet(-1.5,-1.5,-1.5),
-                Cubelet(-1.5,-1.5, 1.5),
-                Cubelet(-1.5, 1.5,-1.5),
-                Cubelet(-1.5, 1.5, 1.5),
-                Cubelet( 1.5,-1.5,-1.5),
-                Cubelet( 1.5,-1.5, 1.5),
-                Cubelet( 1.5, 1.5,-1.5),
-                Cubelet( 1.5, 1.5, 1.5),
+                Cubelet(-1.5,-1.5,-1.5, 0, 0, 0, 1),
+                Cubelet(-1.5,-1.5, 1.5, 0, 0, 0, 1),
+                Cubelet(-1.5, 1.5,-1.5, 0, 0, 0, 1),
+                Cubelet(-1.5, 1.5, 1.5, 0, 0, 0, 1),
+                Cubelet( 1.5,-1.5,-1.5, 0, 0, 0, 1),
+                Cubelet( 1.5,-1.5, 1.5, 0, 0, 0, 1),
+                Cubelet( 1.5, 1.5,-1.5, 0, 0, 0, 1),
+                Cubelet( 1.5, 1.5, 1.5, 0, 0, 0, 1),
             ]
         }
     
     def draw ( self ) :
+        glMatrixMode(GL_MODELVIEW)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        #glScalef(self.s, self.s, self.s)
         for group in self.groups :
             for cubelet in self.groups[group] :
                 cubelet.draw()
 
+        pygame.display.flip()
+
+    def F ( self ) :
+        cubelets = []
+        for group in self.groups :
+            for cubelet in self.groups[group] :
+                if cubelet.py > 1.25 :
+                    cubelets.append(cubelet)
+        
+        for step in range(8) :
+            for cubelet in cubelets :
+                cubelet.Ry(pi / 16)
+            self.draw()
+            time.sleep(0.2)
 
 class Cubelet :
     """
         A Cubelet is a 3 axis Element.
     """
 
-    def __init__ ( self, x, y, z ) :
-        self.pos = (x, y, z)
+    def __init__ ( self, px, py, pz, qx, qy, qz, qw ) :
+        self.px = px
+        self.py = py
+        self.pz = pz
+        self.qx = qx
+        self.qy = qy
+        self.qz = qz
+        self.qw = qw
+    def to_matrix ( self ) :
+        return [
+            [1 - 2 * self.qy * self.qy - 2 * self.qz * self.qz,     2 * self.qx * self.qy - 2 * self.qz * self.qw,     2 * self.qx * self.qz + 2 * self.qy * self.qw, 0],
+            [    2 * self.qx * self.qy + 2 * self.qz * self.qw, 1 - 2 * self.qx * self.qx - 2 * self.qz * self.qz,     2 * self.qy * self.qz - 2 * self.qx * self.qw, 0],
+            [    2 * self.qx * self.qz - 2 * self.qy * self.qw,     2 * self.qy * self.qz + 2 * self.qx * self.qw, 1 - 2 * self.qx * self.qx - 2 * self.qy * self.qy, 0],
+            [                                          self.px,                                           self.py,                                           self.pz, 1]
+        ]
+
+    def Rx ( self, theta ) :
+        self.py = self.py * cos(theta) - self.pz * sin(theta)
+        self.pz = self.py * sin(theta) + self.pz * cos(theta)
+    def Ry ( self, theta ) :
+        self.px = self.pz * sin(theta) + self.px * cos(theta)
+        self.pz = self.pz * cos(theta) - self.px * sin(theta)
+    def Rz ( self, theta ) :
+        self.px = self.px * cos(theta) - self.py * sin(theta)
+        self.py = self.px * sin(theta) + self.py * cos(theta)
 
     def draw ( self ) :
         glPushMatrix()
-        glTranslatef(*self.pos)
+        glMultMatrixf(self.to_matrix())
         glScalef(0.3, 0.3, 0.3)
         self.draw_unit()
         glPopMatrix()
